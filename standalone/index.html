@@ -1,0 +1,1207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="HALO private beta for Acme Inc.">
+<meta property="og:title" content="HALO Private Beta · Heartware">
+<meta property="og:description" content="You've been selected to test HALO, the companion that loves you back.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="og-image.png">
+<meta name="robots" content="noindex">
+<title>Heartware Beta Portal</title>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one long mobile-first "employee portal" page, sticky section chips on top,
+   each section a numbered-free panel on a faint blueprint grid. Single dark look, on purpose. */
+:root {
+  color-scheme: dark;
+  --bg: #07090d;
+  --panel: #0d1117;
+  --line: #1d2530;
+  --fg: #e7ecf2;
+  --muted: #8a96a6;
+  --ice: #6fd3ff;
+  --alarm: #ff3b4e;
+  --ok: #3ee08f;
+  --hacker: #ff3b4e; --leaker: #b58cff; --auditor: #5ccfff; --cofounder: #ffc53d;
+  --witness: #c9d1dc; --lawyer: #ff8a3d; --companion: #ff6fb0; --employee: #ffffff;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 64px); }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before { animation: none !important; transition: none !important; } }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.55 var(--body);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 56px 56px; background-position: -1px -1px;
+  background-attachment: fixed;
+}
+body::before { /* soften the grid toward the center */
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background: radial-gradient(ellipse at 50% 30%, rgba(7,9,13,.55), rgba(7,9,13,.92) 70%);
+}
+.wrap { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding-inline: 16px; padding-block: 0 64px; }
+a { color: var(--ice); }
+:focus-visible { outline: 2px solid var(--ice); outline-offset: 3px; }
+.mono, .label { font-family: var(--mono); }
+.label { font-size: 11.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+
+/* header */
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-block: 22px 18px; border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-stretch: 125%; letter-spacing: .28em; font-size: 15px; }
+.ring { width: 22px; height: 22px; border: 2.5px solid var(--fg); border-radius: 50%; display: grid; place-items: center; flex: none; }
+.ring::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--fg); }
+.stamp { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; color: var(--alarm); border: 1.5px solid var(--alarm); padding: 3px 8px; white-space: nowrap; }
+
+/* hero */
+.hero { padding-block: 36px 28px; display: grid; gap: 14px; }
+.hero h1 { margin: 0; font-family: var(--display); font-weight: 800; font-stretch: 70%; font-size: clamp(48px, 15vw, 96px); line-height: .9; letter-spacing: -.01em; text-transform: uppercase; text-wrap: balance; }
+.hero h1 em { font-style: normal; color: var(--ice); }
+.hero p { margin: 0; max-width: 34em; color: #c3ccd7; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; }
+.fact { font-family: var(--mono); font-size: 12.5px; padding: 6px 10px; border: 1px solid var(--line); background: var(--panel); }
+.fact b { color: var(--ice); font-weight: 500; }
+.boot { font-family: var(--mono); font-size: 12px; color: var(--ok); }
+.boot::after { content: "_"; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* sticky nav */
+nav.chips { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; margin-inline: -16px; padding: 10px 16px; background: rgba(7,9,13,.94); border-block: 1px solid var(--line); display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+nav.chips::-webkit-scrollbar { display: none; }
+nav.chips a { flex: none; text-decoration: none; color: var(--fg); font-family: var(--mono); font-size: 12.5px; letter-spacing: .04em; padding: 7px 12px; border: 1px solid var(--line); background: var(--panel); }
+nav.chips a.hot { border-color: var(--ice); color: var(--ice); }
+
+/* sections */
+section { padding-block: 44px 8px; }
+.sec-head { display: grid; gap: 6px; margin-bottom: 18px; }
+h2 { margin: 0; font-family: var(--display); font-weight: 800; font-stretch: 75%; font-size: clamp(34px, 9vw, 48px); line-height: 1; text-transform: uppercase; text-wrap: balance; }
+h3 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 20px; line-height: 1.2; }
+.lede { margin: 0; color: #c3ccd7; max-width: 36em; }
+.panel { background: var(--panel); border: 1px solid var(--line); padding: 20px; }
+.note { font-size: 14px; color: var(--muted); margin: 12px 0 0; }
+
+/* role lookup */
+.lookup { border-color: #24506a; box-shadow: 0 0 0 1px rgba(111,211,255,.08), 0 20px 60px -30px rgba(111,211,255,.35); display: grid; gap: 14px; }
+.lookup form { display: flex; gap: 8px; flex-wrap: wrap; }
+.lookup input { flex: 1 1 200px; min-width: 0; font: 500 20px/1 var(--mono); letter-spacing: .06em; color: var(--fg); background: #05070a; border: 1px solid #2a3544; padding: 14px 14px; }
+.lookup input::placeholder { color: #465264; }
+.btn { font: 600 15px/1 var(--body); letter-spacing: .02em; padding: 15px 18px; border: 0; background: var(--ice); color: #041018; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+.btn:disabled { opacity: .6; cursor: progress; }
+.btn.ghost { background: transparent; color: var(--ice); border: 1px solid var(--ice); }
+.result { display: grid; gap: 14px; }
+.verdict { font-family: var(--mono); font-size: 13px; letter-spacing: .06em; padding: 12px 14px; border: 1px solid var(--line); }
+.verdict.bad { border-color: var(--alarm); color: #ffd3d8; }
+.verdict.wait { border-color: #3b4a5c; color: #c3ccd7; }
+.role-hit { display: grid; gap: 12px; }
+.role-hit .who { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.role-hit .name { font-family: var(--display); font-weight: 800; font-stretch: 80%; font-size: 56px; line-height: .95; }
+.secret { border: 1px solid currentColor; padding: 14px 16px; font-size: 17px; }
+.secret .label { display: block; margin-bottom: 4px; color: inherit; opacity: .8; }
+.secret p { margin: 0; color: var(--fg); }
+.role-hit img { width: 100%; border: 1px solid var(--line); display: block; }
+.todo { margin: 0; padding-left: 20px; color: #c3ccd7; font-size: 15px; display: grid; gap: 4px; }
+
+/* timeline */
+.tl { list-style: none; margin: 0; padding: 0; display: grid; }
+.tl li { display: grid; grid-template-columns: 74px 1fr; gap: 14px; position: relative; padding-bottom: 22px; }
+.tl li::before { content: ""; position: absolute; left: 86px; top: 8px; bottom: 0; width: 1px; background: var(--line); }
+.tl li:last-child::before { display: none; }
+.tl .t { font-family: var(--mono); font-size: 13px; color: var(--ice); padding-top: 2px; text-align: right; font-variant-numeric: tabular-nums; }
+.tl .d { padding-left: 18px; position: relative; min-width: 0; }
+.tl .d::before { content: ""; position: absolute; left: -5px; top: 7px; width: 9px; height: 9px; background: var(--bg); border: 2px solid var(--ice); border-radius: 50%; }
+.tl .d p { margin: 4px 0 0; color: #c3ccd7; font-size: 15px; }
+.tl .redact .t { color: var(--alarm); }
+.tl .redact .d::before { border-color: var(--alarm); }
+.bars { display: grid; gap: 7px; margin-top: 8px; }
+.bars span { display: block; height: 14px; background: #1a1f27; position: relative; overflow: hidden; }
+.bars span:nth-child(1) { width: 92%; } .bars span:nth-child(2) { width: 70%; } .bars span:nth-child(3) { width: 81%; }
+.bars span::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, transparent, rgba(255,59,78,.35), transparent); transform: translateX(-100%); animation: sweep 3.2s ease-in-out infinite; }
+.bars span:nth-child(2)::after { animation-delay: .5s; } .bars span:nth-child(3)::after { animation-delay: 1s; }
+@keyframes sweep { 60%, 100% { transform: translateX(100%); } }
+.q { font-family: var(--display); font-weight: 800; font-stretch: 70%; font-size: 28px; color: var(--alarm); letter-spacing: .08em; }
+
+/* roles */
+.roles { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.role { background: var(--panel); padding: 16px 18px 16px 20px; display: grid; grid-template-columns: minmax(0, 150px) minmax(0, 1fr); gap: 6px 18px; border-left: 4px solid var(--c); }
+.role h3 { color: var(--c); font-size: 24px; font-stretch: 85%; font-weight: 800; }
+.role .meta { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+.role p { margin: 0; font-size: 15px; }
+.role .win { display: block; font-size: 13.5px; color: var(--muted); margin-top: 4px; }
+@media (max-width: 480px) { .role { grid-template-columns: 1fr; } }
+.ends { margin-top: 14px; border: 1px solid var(--ice); padding: 16px 18px; }
+.ends .label { color: var(--ice); }
+.ends p { margin: 6px 0 0; }
+
+/* drinks */
+.menu { display: grid; gap: 0; }
+.drink { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 14px; padding-block: 16px; border-bottom: 1px solid var(--line); }
+.drink:first-child { padding-top: 0; }
+.dot { width: 20px; height: 20px; border-radius: 50%; margin-top: 4px; background: radial-gradient(circle at 35% 30%, #fff 0 12%, var(--c) 55%, #000 140%); }
+.drink h3 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 22px; }
+.tag { font-family: var(--mono); font-size: 10.5px; letter-spacing: .14em; padding: 3px 6px; border: 1px solid; font-weight: 500; }
+.tag.glow { color: #9fb6ff; } .tag.zero { color: var(--ok); } .tag.door { color: var(--muted); }
+.drink i { display: block; color: #c3ccd7; }
+.drink .mono { font-size: 12px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; }
+.steps { counter-reset: s; list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 12px; align-items: start; }
+.steps li::before { content: counter(s); font-family: var(--mono); font-size: 14px; width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--ice); color: var(--ice); }
+.steps b { color: var(--fg); }
+.two { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.two > * { min-width: 0; }
+.warn { border-left: 3px solid var(--alarm); padding: 10px 14px; background: rgba(255,59,78,.06); font-size: 14.5px; margin: 0; }
+
+/* food */
+.scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; min-width: 460px; }
+th, td { text-align: left; padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+td.c, th.c { text-align: center; }
+td small { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--ice); text-transform: uppercase; }
+.y { color: var(--ok); } .n { color: var(--alarm); } .m { color: var(--cofounder); }
+
+/* NDA: document viewer */
+.viewer { border: 1px solid var(--line); background: #10151c; }
+.viewer-bar { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--line); background: var(--panel); flex-wrap: wrap; }
+.doc-ico { flex: none; width: 34px; height: 42px; display: grid; place-items: end center; padding-bottom: 5px; font: 600 9px var(--mono); letter-spacing: .08em; color: #fff; background: linear-gradient(135deg, transparent 0 9px, var(--alarm) 9px); clip-path: polygon(0 0, 70% 0, 100% 22%, 100% 100%, 0 100%); }
+.doc-meta { display: grid; min-width: 0; flex: 1 1 180px; }
+.doc-meta b { font-weight: 600; font-size: 14.5px; overflow-wrap: anywhere; }
+.doc-meta span { font-family: var(--mono); font-size: 11.5px; color: var(--muted); letter-spacing: .04em; }
+.viewer-bar .btn { padding: 11px 14px; font-size: 14px; }
+.viewer-stage { padding: 22px 18px; background: repeating-linear-gradient(0deg, #0b0f14 0 2px, #0d1218 2px 4px); display: grid; justify-items: center; }
+.sheet { display: block; width: 100%; max-width: 560px; height: auto; background: #fff; box-shadow: 0 1px 0 rgba(255,255,255,.06), 0 24px 50px -18px rgba(0,0,0,.9), 0 0 0 1px rgba(0,0,0,.4); }
+.viewer-foot { display: flex; justify-content: space-between; gap: 10px; padding: 9px 14px; border-top: 1px solid var(--line); font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+/* DJ + photos */
+.cta-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+.pending { font-family: var(--mono); font-size: 13px; color: var(--cofounder); border: 1px dashed var(--cofounder); padding: 10px 12px; }
+.search { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.search input { flex: 1 1 200px; min-width: 0; font: 16px var(--body); color: var(--fg); background: #05070a; border: 1px solid #2a3544; padding: 12px; }
+.eq { display: flex; gap: 4px; align-items: flex-end; height: 34px; margin-bottom: 8px; }
+.eq i { width: 6px; background: var(--ice); animation: eq 1.1s ease-in-out infinite; height: 30%; }
+.eq i:nth-child(2) { animation-delay: .2s } .eq i:nth-child(3) { animation-delay: .4s } .eq i:nth-child(4) { animation-delay: .1s } .eq i:nth-child(5) { animation-delay: .3s }
+@keyframes eq { 50% { height: 100%; } }
+.film { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 16px; }
+.film span { aspect-ratio: 3 / 4; max-width: 100%; border: 1px solid var(--line); background: repeating-linear-gradient(135deg, #0b0f15 0 8px, #0e131a 8px 16px); display: grid; place-items: end start; padding: 6px; font: 10px var(--mono); letter-spacing: .12em; color: #4f5c6e; }
+
+/* verdict */
+.slots { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.slot { background: var(--panel); padding: 14px 16px; display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 12px; align-items: start; }
+.slot .tn { font-family: var(--mono); font-size: 12px; letter-spacing: .14em; color: var(--muted); padding-top: 4px; }
+.slot .sus { font-family: var(--display); font-weight: 800; font-stretch: 80%; font-size: 26px; line-height: 1.05; }
+.slot .why { margin: 4px 0 0; color: #c3ccd7; font-size: 14.5px; }
+.slot.sealed .sus { color: #3a4556; letter-spacing: .1em; }
+.slot.new { animation: land .9s ease-out; }
+@keyframes land { from { background: rgba(255,59,78,.25); } }
+.tally { display: grid; gap: 10px; margin-top: 16px; }
+.bar { display: grid; grid-template-columns: minmax(0, 120px) minmax(0, 1fr) 24px; gap: 10px; align-items: center; font-size: 14.5px; }
+.bar .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar .track { height: 14px; background: #161c25; }
+.bar .fill { height: 100%; background: var(--ice); }
+.bar.lead .fill { background: var(--alarm); }
+.bar .ct { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.fired { margin-top: 16px; border: 2px solid var(--alarm); padding: 16px 18px; background: rgba(255,59,78,.08); }
+.fired .label { color: var(--alarm); }
+.fired .who { font-family: var(--display); font-weight: 800; font-stretch: 75%; font-size: clamp(36px, 11vw, 60px); line-height: 1; text-transform: uppercase; margin-top: 6px; }
+.fired p { margin: 8px 0 0; color: #c3ccd7; }
+.host { margin-top: 18px; border: 1px dashed var(--cofounder); padding: 16px; display: grid; gap: 12px; }
+.host .label { color: var(--cofounder); }
+.host-row { display: grid; grid-template-columns: 58px minmax(0, 1fr) minmax(0, 1.3fr) auto; gap: 8px; align-items: center; }
+.host-row span { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.host input { min-width: 0; font: 15px var(--body); color: var(--fg); background: #05070a; border: 1px solid #2a3544; padding: 10px; }
+@media (max-width: 480px) { .host-row { grid-template-columns: 1fr 1fr; } .host-row span, .host-row button { grid-column: 1 / -1; } }
+.host .msg { font-family: var(--mono); font-size: 12.5px; color: var(--cofounder); min-height: 1em; margin: 0; }
+.btn.warn-btn { background: transparent; color: var(--alarm); border: 1px solid var(--alarm); }
+.card-hit { border: 1px solid currentColor; padding: 18px; display: grid; gap: 10px; }
+.card-hit .tagline { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; background: currentColor; justify-self: start; padding: 4px 8px; }
+.card-hit .tagline b { color: #07090d; font-weight: 500; }
+.card-hit p { margin: 0; color: var(--fg); }
+.card-hit .how { border-top: 1px solid var(--line); padding-top: 10px; }
+.card-hit .how .label { color: inherit; }
+
+/* projector mode: link ending in #tally shows only the Verdict, big, with no host panel */
+.tally-mode .wrap { max-width: 1100px; }
+.tally-mode .wrap > :not(#verdict) { display: none !important; }
+.tally-mode #host { display: none !important; }
+.tally-mode #verdict { padding-top: 24px; }
+.tally-mode .fold > summary > .chev { display: none; }
+.tally-mode .fold-body { display: block !important; }
+.tally-mode h2 { font-size: 64px; }
+.tally-mode .lede { font-size: 20px; max-width: none; }
+.tally-mode .slots { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.tally-mode .slot { grid-template-columns: 1fr; padding: 18px; gap: 6px; align-content: start; }
+.tally-mode .slot .tn { font-size: 16px; }
+.tally-mode .slot .sus { font-size: 34px; overflow-wrap: anywhere; }
+.tally-mode .slot .why { font-size: 17px; }
+.tally-mode .bar { grid-template-columns: minmax(0, 240px) minmax(0, 1fr) 40px; font-size: 22px; }
+.tally-mode .bar .track { height: 22px; }
+.tally-mode .fired .who { font-size: 64px; }
+
+/* hero hook */
+.notice { border: 1px solid var(--cofounder); border-left-width: 4px; background: rgba(255,197,61,.07); padding: 12px 14px; display: grid; gap: 4px; }
+.notice .label { color: var(--cofounder); }
+.notice p { margin: 0; color: var(--fg); font-size: 15.5px; }
+.notice b { font-weight: 600; }
+.btn.rsvp { justify-self: start; font-size: 17px; padding: 16px 22px; box-shadow: 0 0 0 1px rgba(111,211,255,.25), 0 12px 40px -12px rgba(111,211,255,.6); }
+@media (max-width: 480px) { .btn.rsvp { justify-self: stretch; justify-content: center; } }
+.hook { list-style: none; counter-reset: h; margin: 6px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.hook li { counter-increment: h; min-width: 0; }
+.hook a { display: grid; gap: 2px; height: 100%; text-decoration: none; color: var(--fg); padding: 12px; border: 1px solid #24506a; background: rgba(111,211,255,.05); }
+.hook a::before { content: "0" counter(h); font-family: var(--mono); font-size: 11px; color: var(--ice); letter-spacing: .1em; }
+.hook b { font-family: var(--display); font-weight: 700; font-size: 17px; line-height: 1.15; }
+.hook span { font-size: 12.5px; color: var(--muted); }
+@media (max-width: 480px) { .hook { grid-template-columns: 1fr; } .hook a { grid-template-columns: 28px 1fr; } .hook a::before { grid-row: span 2; padding-top: 3px; } }
+
+/* collapsible sections */
+.fold > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: minmax(0, 1fr) 36px; gap: 4px 12px; align-items: end; margin-bottom: 0; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.fold > summary::-webkit-details-marker { display: none; }
+.fold > summary > .label { grid-column: 1; }
+.fold > summary > h2 { grid-column: 1; }
+.fold > summary > .chev { grid-column: 2; grid-row: 1 / span 2; align-self: center; width: 34px; height: 34px; border: 1px solid var(--line); position: relative; }
+.fold > summary > .chev::before, .fold > summary > .chev::after { content: ""; position: absolute; left: 50%; top: 50%; width: 12px; height: 2px; background: var(--ice); transform: translate(-50%, -50%); }
+.fold > summary > .chev::after { transform: translate(-50%, -50%) rotate(90deg); transition: transform .2s; }
+.fold[open] > summary > .chev::after { transform: translate(-50%, -50%) rotate(0deg); }
+.fold > summary:hover > .chev { border-color: var(--ice); }
+.fold-body { padding-top: 18px; }
+section { padding-block: 28px 0; }
+
+/* venue */
+.big { font-size: 22px; line-height: 1.25; margin: 4px 0 0; color: var(--fg); overflow-wrap: anywhere; }
+.addr { display: grid; gap: 8px; align-content: start; }
+.creds { display: grid; gap: 16px; }
+.cred { display: grid; gap: 2px; justify-items: start; }
+.cred .hint { font-size: 13px; color: var(--muted); }
+.cred .copy { margin-top: 8px; padding: 9px 12px; font-size: 13.5px; }
+
+/* photo reel (post-party): surveillance feed */
+.feed { border: 1px solid var(--line); background: #05070a; padding: 10px; position: relative; }
+.feed-bar, .feed-ctl { display: flex; justify-content: space-between; align-items: center; gap: 10px; font: 500 11px/1 var(--mono); letter-spacing: .16em; color: var(--muted); }
+.feed-bar { padding: 2px 2px 10px; }
+.feed-bar .live { color: var(--alarm); animation: blink 1.4s steps(2) infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+.reel { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; padding: 4px 9% 8px; outline: none; }
+.reel::-webkit-scrollbar { display: none; }
+.slide { flex: 0 0 82%; margin: 0; scroll-snap-align: center; position: relative; aspect-ratio: 3 / 4; overflow: hidden; border: 1px solid #2a3544;
+  opacity: .35; filter: grayscale(.9) contrast(1.1); transform: scale(.94); transition: opacity .35s, filter .35s, transform .35s, box-shadow .35s; }
+.slide.wide { aspect-ratio: 4 / 3; align-self: center; }
+.slide.on { opacity: 1; filter: none; transform: none; box-shadow: -3px 0 0 rgba(255,59,78,.55), 3px 0 0 rgba(111,211,255,.55), 0 0 40px -10px rgba(111,211,255,.6); }
+.slide a, .slide img { display: block; width: 100%; height: 100%; }
+.slide img { object-fit: cover; }
+.slide::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 3px); mix-blend-mode: multiply; }
+.slide::after { content: ""; position: absolute; inset: 10px; pointer-events: none; z-index: 1;
+  background: linear-gradient(var(--ice),var(--ice)) top left/18px 2px, linear-gradient(var(--ice),var(--ice)) top left/2px 18px,
+    linear-gradient(var(--ice),var(--ice)) top right/18px 2px, linear-gradient(var(--ice),var(--ice)) top right/2px 18px,
+    linear-gradient(var(--ice),var(--ice)) bottom left/18px 2px, linear-gradient(var(--ice),var(--ice)) bottom left/2px 18px,
+    linear-gradient(var(--ice),var(--ice)) bottom right/18px 2px, linear-gradient(var(--ice),var(--ice)) bottom right/2px 18px;
+  background-repeat: no-repeat; }
+.slide .cam, .slide figcaption { position: absolute; z-index: 2; left: 18px; font: 500 11px/1 var(--mono); letter-spacing: .14em; padding: 5px 7px; background: rgba(5,7,10,.72); pointer-events: none; }
+.slide .cam { top: 18px; color: var(--alarm); }
+.slide figcaption { bottom: 18px; color: var(--ice); }
+.slide.on img { animation: glitch .45s steps(3) 1; }
+@keyframes glitch { 0% { transform: translateX(-6px); filter: hue-rotate(60deg) saturate(2); } 50% { transform: translateX(4px); } 100% { transform: none; filter: none; } }
+.lightbox { border: 1px solid var(--ice); background: #020306; padding: 0; max-width: 96vw; max-height: 92vh; overflow: hidden; color: var(--fg);
+  box-shadow: -4px 0 0 rgba(255,59,78,.6), 4px 0 0 rgba(111,211,255,.6), 0 0 80px -10px rgba(111,211,255,.7); }
+.lightbox::backdrop { background: rgba(2,3,6,.88); backdrop-filter: blur(3px); }
+.lightbox[open] { animation: lbIn .35s steps(4) 1; }
+@keyframes lbIn { 0% { opacity: 0; transform: scaleY(.02); filter: hue-rotate(90deg); } 60% { opacity: 1; transform: scaleY(1.02); } 100% { transform: none; filter: none; } }
+.lightbox img { display: block; max-width: 96vw; max-height: 92vh; object-fit: contain; }
+.lightbox .cam { position: absolute; top: 12px; left: 12px; font: 500 11px/1 var(--mono); letter-spacing: .14em; padding: 5px 7px; background: rgba(5,7,10,.72); color: var(--alarm); }
+.lb-x, .lb-nav { position: absolute; border: 1px solid var(--ice); background: rgba(5,7,10,.75); color: var(--ice); font: 500 16px/1 var(--mono); cursor: pointer; width: 40px; height: 40px; }
+.lb-x { top: 10px; right: 10px; }
+.lb-nav { top: 50%; transform: translateY(-50%); }
+.lb-nav.prev { left: 10px; } .lb-nav.next { right: 10px; }
+.feed-ctl { padding-top: 10px; }
+.feed-ctl .btn { padding: 10px 12px; font: 500 12px/1 var(--mono); letter-spacing: .12em; }
+.reel-prog { flex: 1; height: 2px; background: var(--line); position: relative; }
+.reel-prog span { position: absolute; left: 0; top: 0; bottom: 0; width: 14%; background: var(--ice); box-shadow: 0 0 8px var(--ice); transition: width .3s; }
+@media (min-width: 640px) { .slide { flex-basis: 58%; } .reel { padding-inline: 21%; } }
+
+/* feedback (post-party) */
+.fb-banner { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; border: 1px solid var(--ice); background: rgba(111,211,255,.07); padding: 14px 16px; margin-top: 18px; }
+.fb-banner p { margin: 0; font-size: 15.5px; }
+.fb-intro { margin: 0 0 18px; color: var(--fg); }
+.fb-intro small { display: block; margin-top: 6px; color: var(--muted); font-size: 14px; }
+.fb { display: grid; gap: 22px; }
+.fb fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; min-width: 0; }
+.fb legend, .fb .fb-q { font-family: var(--body); color: var(--fg); letter-spacing: 0; text-transform: none; font-weight: 600; font-size: 16.5px; line-height: 1.35; padding: 0; margin-bottom: 8px; }
+.fb .fb-q small, .fb legend small { display: block; font-weight: 400; color: var(--muted); font-size: 14px; margin-top: 2px; }
+.fb textarea { width: 100%; min-height: 84px; resize: vertical; font: 16px/1.45 var(--body); color: var(--fg); background: #05070a; border: 1px solid #2a3544; padding: 12px; }
+.fb textarea:focus, .fb .opts input:focus-visible + span { outline: 2px solid var(--ice); outline-offset: 1px; }
+.fb .opts { display: flex; gap: 8px; flex-wrap: wrap; }
+.fb .opts label { position: relative; }
+.fb .opts input { position: absolute; opacity: 0; inset: 0; }
+.fb .opts span { display: inline-block; padding: 11px 16px; border: 1px solid #2a3544; cursor: pointer; font-size: 15px; }
+.fb .opts input:checked + span { border-color: var(--ice); color: var(--ice); background: rgba(111,211,255,.08); }
+.fb .send { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.fb .send small { color: var(--muted); font-size: 13.5px; }
+.fb-done { border: 1px solid var(--ok); background: rgba(62,224,143,.07); padding: 16px; }
+.fb-done p { margin: 0; }
+
+footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-family: var(--mono); font-size: 11px; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+
+/* corporate demo additions */
+.demo-bar { margin-top: 14px; font-family: var(--mono); font-size: 12.5px; line-height: 1.5; color: var(--cofounder); border: 1px dashed var(--cofounder); padding: 8px 12px; }
+.demo-bar b { letter-spacing: .14em; margin-right: 6px; }
+.demo-bar a { color: var(--cofounder); }
+.hero-cta { margin-top: 18px; }
+.rating-chip b { color: var(--cofounder); }
+.rating-card { display: flex; gap: 16px; align-items: flex-start; border: 1px solid var(--line); background: var(--panel); padding: 16px; }
+.rating-badge { flex: none; display: grid; place-items: center; min-width: 96px; border: 2px solid var(--fg); padding: 8px 10px; text-align: center; }
+.rating-badge span { font-family: var(--mono); font-size: 11px; letter-spacing: .3em; }
+.rating-badge b { font-family: var(--display); font-weight: 800; font-stretch: 75%; font-size: 40px; line-height: 1; }
+.rating-text { min-width: 0; }
+.rating-text p { margin: 0; }
+.rating-scale { width: 100%; min-width: 0; }
+.rating-scale td { vertical-align: top; }
+.rating-scale td:first-child { font-family: var(--mono); font-weight: 500; white-space: nowrap; }
+.rating-scale tr.on td { color: var(--cofounder); }
+.rating-scale tr.on td:first-child::after { content: " · this event"; font-size: 11px; letter-spacing: .1em; }
+ul.plain { margin: 0; padding-left: 18px; display: grid; gap: 8px; font-size: 15px; }
+.demo-codes { margin-top: 14px; display: grid; gap: 12px; }
+.code-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.code-row button { font: 500 13px/1 var(--mono); letter-spacing: .04em; color: var(--fg); background: #05070a; border: 1px solid #2a3544; padding: 9px 10px; cursor: pointer; }
+.code-row button b { display: block; font-size: 10.5px; letter-spacing: .14em; color: var(--muted); font-weight: 500; margin-bottom: 4px; }
+.code-row button:hover { border-color: var(--ice); }
+.vote { display: grid; gap: 10px; }
+.vote-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.vote select, .vote input { font: 16px var(--body); color: var(--fg); background: #05070a; border: 1px solid #2a3544; padding: 12px; min-width: 0; }
+.vote select { flex: 0 0 96px; }
+.vote-row input { flex: 1 1 200px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.fb .opts.nps { gap: 6px; }
+.fb .opts.nps span { padding: 10px 0; width: 42px; text-align: center; }
+@media (max-width: 480px) { .rating-card { flex-direction: column; } }
+</style>
+
+<div class="wrap">
+  <div class="demo-bar" id="demo-bar"><b>Demo</b> A sample event for a fictional client, Acme Inc. Every name and code here is made up. <a href="#role">Try an access code</a> · <a href="invite.html">See the invites</a> · <a href="show.html">See the show slides</a> · <a href="control.html">Show control panel</a></div>
+  <header class="top">
+    <div class="brand"><span class="ring"></span>HEARTWARE</div>
+    <span class="stamp">CONFIDENTIAL</span>
+  </header>
+
+  <div class="hero">
+    <span class="boot" aria-hidden="true">&gt; halo.beta --client acme --access granted</span>
+    <h1>HALO private <em>beta</em></h1>
+    <p>Heartware is launching HALO, the companion that loves you back, and the Acme team is on the private beta list. Everyone in the room gets a secret role. Two of them are Hackers.</p>
+    <div class="cta-row hero-cta">
+      <a class="btn rsvp" id="cal-link" href="#" target="_blank" rel="noopener">Add to Google Calendar ↗</a>
+    </div>
+    <ol class="hook">
+      <li><a href="#role"><b>Are you a Hacker?</b><span>Unlock your secret role</span></a></li>
+      <li><a href="#venue"><b>Arrive at 5:30</b><span>Getting there</span></a></li>
+      <li><a href="#roles"><b>Find the Hackers</b><span>Fire one and the company wins</span></a></li>
+    </ol>
+    <div class="facts">
+      <span class="fact"><b>THU</b> DEC 10</span>
+      <span class="fact"><b>5:30–8 PM</b></span>
+      <span class="fact"><b>ACME HQ</b> 4TH FLOOR</span>
+      <a class="fact rating-chip" href="#advisory"><b id="rating-chip">PG-13</b> CONTENT ADVISORY</a>
+    </div>
+  </div>
+
+  <nav class="chips" aria-label="Sections">
+    <a href="#schedule">Schedule</a>
+    <a href="#advisory">Content advisory</a>
+    <a href="#roles">All roles</a>
+    <a href="#role">Your secret role</a>
+    <a href="#venue">Venue</a>
+    <a href="#drinks">Drinks</a>
+    <a href="#food">Food</a>
+    <a href="#nda">NDA</a>
+    <a href="#verdict">Verdict</a>
+    <a href="#dj">Music</a>
+    <a href="#photos">Photo wall</a>
+    <a href="#feedback">Feedback</a>
+  </nav>
+
+  <!-- SCHEDULE -->
+  <section id="schedule">
+    <details class="fold" open>
+      <summary class="sec-head">
+      <span class="label">Launch night · run of show</span>
+      <h2>Schedule</h2>
+      <span class="chev" aria-hidden="true"></span></summary>
+      <div class="fold-body">    <ol class="tl">
+      <li><span class="t">5:30</span><div class="d"><h3>Check in</h3><p>Sign your NDA, pick up your Compliance Toast (sparkling wine or a mocktail), and pose for your employee ID photo. No smiling. It's corporate.</p></div></li>
+      <li><span class="t">5:30–6:15</span><div class="d"><h3>Onboarding</h3><p>Meet people, eat, get a drink from the bar.</p></div></li>
+      <li><span class="t">~6:15</span><div class="d"><h3>CEO keynote: HALO launch</h3><p>The CEO introduces HALO and leads the toast. Be in the room for this one.</p></div></li>
+      <li class="redact"><span class="t">???</span><div class="d"><span class="q">???</span><div class="bars" aria-label="Redacted"><span></span><span></span><span></span></div><p>This part of the schedule is classified. See the <a href="#advisory">content advisory</a>.</p></div></li>
+      <li><span class="t">~7:15</span><div class="d"><h3>Verdict and awards</h3><p>The board votes, the Hackers are revealed, and the best players get awards: Best Detective, Best Liar, Best Alibi.</p></div></li>
+      <li><span class="t">7:30–8:00</span><div class="d"><h3>Mingle</h3><p>Background music and last drinks. The bar closes at 7:45. We wrap at 8:00. Want a song played? <a href="#dj">Add it here</a>.</p></div></li>
+      <li id="sched-dance" hidden><span class="t">8:00–9:00</span><div class="d"><h3>Dance floor</h3><p>Optional. Lights down, music up. Stay as long as you like.</p></div></li>
+    </ol>
+      </div>
+    </details>
+  </section>
+
+  <!-- CONTENT ADVISORY -->
+  <section id="advisory">
+    <details class="fold" open>
+      <summary class="sec-head">
+      <span class="label">Rated by the Heartware board</span>
+      <h2>Content advisory</h2>
+      <span class="chev" aria-hidden="true"></span></summary>
+      <div class="fold-body">
+      <div class="rating-card">
+        <div class="rating-badge"><span>RATED</span><b id="rating-big">PG-13</b></div>
+        <div class="rating-text">
+          <p id="rating-desc"></p>
+          <p class="note" id="rating-note" style="margin-top:8px"></p>
+        </div>
+      </div>
+      <div class="scroll" style="margin-top:14px">
+        <table class="rating-scale">
+          <thead><tr><th>Rating</th><th>What happens at the keynote</th></tr></thead>
+          <tbody id="rating-rows"></tbody>
+        </table>
+      </div>
+      <p class="note">The organizer picks the rating when they book. Nobody is touched, singled out or put on the spot. Want a heads-up or a seat by the door? <span id="advisory-contact"></span></p>
+      </div>
+    </details>
+  </section>
+
+  <!-- ROLES -->
+  <section id="roles">
+    <details class="fold" open>
+      <summary class="sec-head">
+      <span class="label">Who's in the building</span>
+      <h2>All roles</h2>
+      <span class="chev" aria-hidden="true"></span></summary>
+      <div class="fold-body">
+      <p class="lede" style="margin-bottom:16px">Everyone gets a role. Here's every role in play and how many there are. Nobody knows who has which one.</p>
+    <div class="roles">
+      <div class="role" style="--c:var(--hacker)"><div><h3>Hacker</h3><div class="meta">×2 · bad</div></div><p>Sabotaged HALO. Know each other.<span class="win">Win if no Hacker gets fired.</span></p></div>
+      <div class="role" style="--c:var(--leaker)"><div><h3>Leaker</h3><div class="meta">×1 · bad</div></div><p>Knows the Hackers, but the Hackers don't know who the Leaker is. Covers for them.<span class="win">Wins if no Hacker gets fired.</span></p></div>
+      <div class="role" style="--c:var(--auditor)"><div><h3>Auditor</h3><div class="meta">×1 · good</div></div><p>Knows two names: one of them is a Hacker, the other isn't.<span class="win">Wins if a Hacker gets fired.</span></p></div>
+      <div class="role" style="--c:var(--cofounder)"><div><h3>Co-founder</h3><div class="meta">×2 · good</div></div><p>Know each other and know they're both innocent.<span class="win">Win if a Hacker gets fired.</span></p></div>
+      <div class="role" style="--c:var(--witness)"><div><h3>Witness</h3><div class="meta">Many · good</div></div><p>Each knows one person who is NOT a Hacker.<span class="win">Wins if a Hacker gets fired.</span></p></div>
+      <div class="role" style="--c:var(--lawyer)"><div><h3>Lawyer</h3><div class="meta">×4 · solo</div></div><p>Has a secret client.<span class="win">Wins if their client isn't fired.</span></p></div>
+      <div class="role" style="--c:var(--companion)"><div><h3>Companion</h3><div class="meta">×1 · loyal</div></div><p>A HALO robot a Hacker secretly programmed to protect them. Wants to get fired in their place.<span class="win">Wins if the Companion gets fired.</span></p></div>
+      <div class="role" style="--c:var(--employee)"><div><h3>Employee</h3><div class="meta">Anyone · good</div></div><p>No secrets. Pick this if you'd rather just watch and vote.<span class="win">Wins if a Hacker gets fired.</span></p></div>
+    </div>
+    <div class="ends">
+      <span class="label">How it ends</span>
+      <p>On the night, everyone is put into one of 5 small teams. A team is just a group to hunt with, not a side: each one mixes good guys, bad guys and lawyers. Each team's captain submits one suspect on this page. Whoever's named most is fired. Fire a Hacker and the company wins.</p>
+    </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ROLE LOOKUP -->
+  <section id="role">
+    <details class="fold" open>
+      <summary class="sec-head">
+      <span class="label">Access control · eyes only</span>
+      <h2>Are you a Hacker?</h2>
+      <span class="chev" aria-hidden="true"></span></summary>
+      <div class="fold-body">
+      <p class="lede" style="margin-bottom:16px">Somebody in this room sabotaged HALO. It might be you. Enter the access code from your invite to unlock your secret role and what only you know. Cover your screen.</p>
+    <div class="panel lookup">
+      <form id="lookup-form" autocomplete="off">
+        <label class="label" for="phone" style="flex-basis:100%">Access code</label>
+        <input id="phone" name="code" type="text" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="ABC-123" required>
+        <button class="btn" id="lookup-btn" type="submit">Reveal my role</button>
+      </form>
+      <div class="result" id="result" aria-live="polite"></div>
+    </div>
+    <div class="panel demo-codes" id="demo-codes" hidden>
+      <span class="label">Demo codes · one per role</span>
+      <div class="code-row" id="code-row"></div>
+      <p class="note" style="margin-top:0">Real guests get one code each, printed on their invite card or in their invite email.</p>
+    </div>
+    <p class="note">Your code stays on your phone. The page doesn't send it anywhere.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- VENUE -->
+  <section id="venue">
+    <details class="fold">
+      <summary class="sec-head">
+      <span class="label">Facility access · Acme HQ</span>
+      <h2>Venue</h2>
+      <span class="chev" aria-hidden="true"></span></summary>
+      <div class="fold-body">
+      <p class="lede" style="margin-bottom:16px">The 4th floor Commons at Acme HQ. The street address is in your calendar invite.</p>
+    <div class="two">
+      <div class="panel">
+        <h3 style="margin-bottom:14px">Getting in</h3>
+        <ol class="steps">
+          <li><span>Check in with <b>building security</b> in the lobby. Bring a photo ID.</span></li>
+          <li><span>Take the <b>elevators</b> to 4. The route is step-free.</span></li>
+          <li><span>Follow the <b>HALO beta</b> signs to the check-in desk.</span></li>
+        </ol>
+        <p class="note">Wi-Fi details are at check-in. We don't post passwords here.</p>
+      </div>
+      <div class="panel">
+        <h3 style="margin-bottom:14px">Access needs</h3>
+        <ul class="plain">
+          <li>Seating is available through the whole program, including the investigation.</li>
+          <li>A printed copy of the keynote is at check-in if you'd rather read it.</li>
+          <li>A quiet room is down the hall from the Commons.</li>
+        </ul>
+        <span class="label" style="display:block;margin-top:16px">Event contact</span>
+        <p class="big mono" id="contact-name" style="margin:4px 0 0"></p>
+        <p class="mono" id="contact-email" style="margin:2px 0 0"></p>
+      </div>
+    </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- DRINKS -->
+  <section id="drinks">
+    <details class="fold">
+      <summary class="sec-head">
+      <span class="label">Refreshments · approved for beta testers</span>
+      <h2>Drinks</h2>
+      <span class="chev" aria-hidden="true"></span></summary>
+      <div class="fold-body">    <div class="two">
+      <div class="panel menu">
+        <div class="drink" style="--c:#e8d9a8"><span class="dot"></span><div><h3>Compliance Toast <span class="tag door">AT CHECK-IN</span></h3><i>Raised together at the keynote.</i><span class="mono">Sparkling wine, or a Sandbox Spritz</span></div></div>
+        <div class="drink" style="--c:#e0243a"><span class="dot"></span><div><h3>Kill Switch</h3><i>For when things go wrong.</i><span class="mono">Vodka · cranberry · lime · soda</span></div></div>
+        <div class="drink" style="--c:#8f7dff"><span class="dot"></span><div><h3>Hallucination <span class="tag zero">ZERO-PROOF</span></h3><i>Changes color when it's poured. Don't trust what you see.</i><span class="mono">Butterfly pea tea · tonic · lemon</span></div></div>
+        <div class="drink" style="--c:#f3a9bf"><span class="dot"></span><div><h3>Sandbox Spritz <span class="tag zero">ZERO-PROOF</span></h3><i>Safe for testing.</i><span class="mono">Cranberry · ginger · rosemary · soda</span></div></div>
+        <div class="drink" style="--c:#c9ced6"><span class="dot"></span><div><h3>Standard issue</h3><i>Wine and beer.</i><span class="mono">Red · white · local beer</span></div></div>
+      </div>
+      <div class="panel">
+        <h3 style="margin-bottom:14px">At the bar</h3>
+        <ul class="plain">
+          <li>A bartender makes every drink.</li>
+          <li>The zero-proof drinks get the same glass, garnish and care.</li>
+          <li>The bar closes at 7:45.</li>
+        </ul>
+        <p class="note">Water is at check-in and the bar. Hydration is mandatory.</p>
+      </div>
+    </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- FOOD -->
+  <section id="food">
+    <details class="fold">
+      <summary class="sec-head">
+      <span class="label">Catering · enough to count as dinner</span>
+      <h2>Food</h2>
+      <span class="chev" aria-hidden="true"></span></summary>
+      <div class="fold-body">
+      <p class="lede" style="margin-bottom:16px">Appetizers are out from 5:30, and heavier bites come out after the keynote.</p>
+    <div class="panel scroll">
+      <table style="min-width:520px">
+        <thead><tr><th>On the table</th><th class="c">Vegan</th><th class="c">Vegetarian</th><th class="c">Gluten-free</th><th class="c">Nut-free</th></tr></thead>
+        <tbody>
+          <tr><td>Sushi rolls (fish)<small>Verified data</small></td><td class="c n">No</td><td class="c n">No</td><td class="c y">Yes</td><td class="c y">Yes</td></tr>
+          <tr><td>Veggie rolls<small>Sanitized inputs</small></td><td class="c y">Yes</td><td class="c y">Yes</td><td class="c y">Yes</td><td class="c y">Yes</td></tr>
+          <tr><td>Chicken skewers<small>Legacy systems</small></td><td class="c n">No</td><td class="c n">No</td><td class="c y">Yes</td><td class="c y">Yes</td></tr>
+          <tr><td>Cheese and crackers<small>Cached data</small></td><td class="c n">No</td><td class="c y">Yes</td><td class="c n">No</td><td class="c y">Yes</td></tr>
+          <tr><td>Fruit<small>Organic hardware</small></td><td class="c y">Yes</td><td class="c y">Yes</td><td class="c y">Yes</td><td class="c y">Yes</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note">Sushi is made with gluten-free tamari. Final labels come from the caterer and are posted at the table. Allergies, halal or kosher? Tell <span class="contact-inline"></span> by Dec 3.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- NDA -->
+  <section id="nda">
+    <details class="fold">
+      <summary class="sec-head">
+      <span class="label">Required before entry</span>
+      <h2>NDA</h2>
+      <span class="chev" aria-hidden="true"></span></summary>
+      <div class="fold-body">
+      <p class="lede" style="margin-bottom:16px">You'll sign a printed copy at check-in. It's part of the game, not a real contract.</p>
+    <div class="viewer">
+      <div class="viewer-bar">
+        <span class="doc-ico" aria-hidden="true">PDF</span>
+        <div class="doc-meta"><b>Heartware_Beta_Tester_NDA.pdf</b><span>Form HW-NDA-1210 · 1 page</span></div>
+        <button class="btn" type="button" id="nda-dl">Download PDF</button>
+      </div>
+      <div class="viewer-stage">
+        <img class="sheet" src="nda-share.png?v=3" alt="Heartware Beta Tester NDA: confidentiality, monitoring, the Compliance Toast, instructions, incidents, termination and survival clauses, with a signature line. For entertainment purposes only." width="1632" height="2112">
+      </div>
+      <div class="viewer-foot"><span>Page 1 of 1</span><span id="nda-status">Pinch to zoom</span></div>
+    </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- VERDICT -->
+  <section id="verdict">
+    <details class="fold">
+      <summary class="sec-head">
+      <span class="label">Board vote · live</span>
+      <h2>Verdict</h2>
+      <span class="chev" aria-hidden="true"></span></summary>
+      <div class="fold-body">
+      <p class="lede" style="margin-bottom:16px">Voting opens after the investigation. Your team is the small group you're put in on the night, not your role's side. Each team's captain submits one suspect here. First vote counts. Results go up on the big screen.</p>
+    <form class="panel vote" id="vote-form" autocomplete="off">
+      <span class="label">Team captains only</span>
+      <div class="vote-row">
+        <label class="sr" for="vote-team">Team</label>
+        <select id="vote-team" required>
+          <option value="">Team</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+        </select>
+        <label class="sr" for="vote-sus">Suspect</label>
+        <input id="vote-sus" list="guest-names" placeholder="Suspect's name" required>
+        <datalist id="guest-names"></datalist>
+      </div>
+      <label class="sr" for="vote-why">Why</label>
+      <input id="vote-why" placeholder="Why? (optional)">
+      <div class="cta-row" style="margin-top:0">
+        <button class="btn" type="submit">Lock in our vote</button>
+        <button class="btn ghost" type="button" id="vote-sample">Play a sample vote</button>
+        <button class="btn ghost" type="button" id="vote-reset">Clear</button>
+      </div>
+      <p class="note" id="vote-msg" style="margin-top:0">Demo: votes stay on this device.</p>
+    </form>
+    <div id="verdict-body" style="margin-top:14px"></div>
+      </div>
+    </details>
+  </section>
+
+  <!-- MUSIC -->
+  <section id="dj">
+    <details class="fold">
+      <summary class="sec-head">
+      <span class="label">Audio department</span>
+      <h2>Background music</h2>
+      <span class="chev" aria-hidden="true"></span></summary>
+      <div class="fold-body">
+      <p class="lede" style="margin-bottom:16px">Add a song for the mingle. It goes straight into the event playlist on Spotify.</p>
+    <div class="panel">
+      <div class="eq" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <ol class="steps">
+        <li><span>Tap <b>Add songs on Spotify</b> below. It opens the playlist in your Spotify app.</span></li>
+        <li><span>Tap <b>Join</b> or <b>Add to this playlist</b> if Spotify asks.</span></li>
+        <li><span>Search for your song and add it. Clean versions, please.</span></li>
+      </ol>
+      <div class="cta-row" id="dj-cta"></div>
+      <form class="search" id="song-form">
+        <input id="song" type="text" placeholder="Song or artist" aria-label="Song or artist">
+        <button class="btn ghost" type="submit">Find it on Spotify</button>
+      </form>
+      <p class="note">Free Spotify accounts work.</p>
+    </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- PHOTO WALL -->
+  <section id="photos">
+    <details class="fold" open>
+      <summary class="sec-head">
+      <span class="label">Surveillance footage · a past launch</span>
+      <h2>Photo wall</h2>
+      <span class="chev" aria-hidden="true"></span></summary>
+      <div class="fold-body">
+      <div class="feed">
+        <div class="feed-bar"><span class="live">● ARCHIVE</span><span id="reel-count">01 / 07</span></div>
+        <div class="reel" id="reel" tabindex="0" aria-label="Photos from a past event, swipe or use arrow keys">
+        <figure class="slide wide" data-i="1">
+          <a href="photos/party-1.jpg"><img src="photos/party-1.jpg" alt="The lobby before launch" loading="lazy"></a>
+          <span class="cam">REC · CAM 01</span>
+          <figcaption>&gt; lobby_pre_launch.jpg</figcaption>
+        </figure>
+        <figure class="slide" data-i="2">
+          <a href="photos/party-2.jpg"><img src="photos/party-2.jpg" alt="Critical incident" loading="lazy"></a>
+          <span class="cam">REC · CAM 02</span>
+          <figcaption>&gt; critical_incident.jpg</figcaption>
+        </figure>
+        <figure class="slide" data-i="3">
+          <a href="photos/party-3.jpg"><img src="photos/party-3.jpg" alt="The board votes" loading="lazy"></a>
+          <span class="cam">REC · CAM 03</span>
+          <figcaption>&gt; board_vote.jpg</figcaption>
+        </figure>
+        <figure class="slide" data-i="4">
+          <a href="photos/party-4.jpg"><img src="photos/party-4.jpg" alt="Who was who" loading="lazy"></a>
+          <span class="cam">REC · CAM 04</span>
+          <figcaption>&gt; who_was_who.jpg</figcaption>
+        </figure>
+        <figure class="slide" data-i="5">
+          <a href="photos/party-5.jpg"><img src="photos/party-5.jpg" alt="Guests at a past launch" loading="lazy"></a>
+          <span class="cam">REC · CAM 05</span>
+          <figcaption>&gt; exec_team_01.jpg</figcaption>
+        </figure>
+        <figure class="slide" data-i="6">
+          <a href="photos/party-6.jpg"><img src="photos/party-6.jpg" alt="Guests at a past launch" loading="lazy"></a>
+          <span class="cam">REC · CAM 06</span>
+          <figcaption>&gt; exec_team_02.jpg</figcaption>
+        </figure>
+        <figure class="slide" data-i="7">
+          <a href="photos/party-7.jpg"><img src="photos/party-7.jpg" alt="Guests at a past launch" loading="lazy"></a>
+          <span class="cam">REC · CAM 07</span>
+          <figcaption>&gt; exec_team_03.jpg</figcaption>
+        </figure>
+        </div>
+        <div class="feed-ctl">
+          <button class="btn ghost" type="button" id="reel-prev" aria-label="Previous photo">&lt; PREV</button>
+          <div class="reel-prog" aria-hidden="true"><span id="reel-bar"></span></div>
+          <button class="btn ghost" type="button" id="reel-next" aria-label="Next photo">NEXT &gt;</button>
+        </div>
+      </div>
+      <dialog class="lightbox" id="lightbox" aria-label="Photo">
+        <span class="cam" id="lb-cam">REC · CAM 01</span>
+        <button class="lb-x" type="button" id="lb-close" aria-label="Close">✕</button>
+        <img id="lb-img" alt="">
+        <button class="lb-nav prev" type="button" id="lb-prev" aria-label="Previous photo">&lt;</button>
+        <button class="lb-nav next" type="button" id="lb-next" aria-label="Next photo">&gt;</button>
+      </dialog>
+    <p class="note">Photos from a past Heartware launch. We'll take photos at yours too. Rather not be in them? Tell the check-in desk and we'll leave you out.</p>
+      </div>
+    </details>
+  </section>
+
+  <!-- FEEDBACK (after the event) -->
+  <section id="feedback">
+    <details class="fold">
+      <summary class="sec-head">
+      <span class="label">Anonymous · 2 minutes · after the event</span>
+      <h2>How was it?</h2>
+      <span class="chev" aria-hidden="true"></span></summary>
+      <div class="fold-body">
+      <p class="fb-intro">Anonymous. Skip anything. Honest answers help.</p>
+      <form class="fb" id="fb-form">
+        <fieldset>
+          <legend>How likely are you to recommend this to another team? (0 to 10)</legend>
+          <div class="opts nps">
+            <label><input type="radio" name="recommend" value="0"><span>0</span></label><label><input type="radio" name="recommend" value="1"><span>1</span></label><label><input type="radio" name="recommend" value="2"><span>2</span></label><label><input type="radio" name="recommend" value="3"><span>3</span></label><label><input type="radio" name="recommend" value="4"><span>4</span></label><label><input type="radio" name="recommend" value="5"><span>5</span></label><label><input type="radio" name="recommend" value="6"><span>6</span></label><label><input type="radio" name="recommend" value="7"><span>7</span></label><label><input type="radio" name="recommend" value="8"><span>8</span></label><label><input type="radio" name="recommend" value="9"><span>9</span></label><label><input type="radio" name="recommend" value="10"><span>10</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Did the game make it easier to talk to coworkers you didn't already know?</legend>
+          <div class="opts">
+            <label><input type="radio" name="talk_to_new_people" value="Yes"><span>Yes</span></label>
+            <label><input type="radio" name="talk_to_new_people" value="Somewhat"><span>Somewhat</span></label>
+            <label><input type="radio" name="talk_to_new_people" value="No"><span>No</span></label>
+          </div>
+          <textarea name="talk_why" aria-label="Why? (optional)" placeholder="Why? (optional)" style="min-height:60px"></textarea>
+        </fieldset>
+        <fieldset>
+          <label class="fb-q" for="fb-lost">Was there a moment you felt lost, bored, awkward, or unsure what you were supposed to do?<small>What was going on at the time?</small></label>
+          <textarea id="fb-lost" name="lost_or_awkward"></textarea>
+        </fieldset>
+        <fieldset>
+          <label class="fb-q" for="fb-change">What would you change or cut?</label>
+          <textarea id="fb-change" name="change_or_cut"></textarea>
+        </fieldset>
+        <fieldset>
+          <label class="fb-q" for="fb-keep">What's one thing that's worth keeping?</label>
+          <textarea id="fb-keep" name="keep" style="min-height:60px"></textarea>
+        </fieldset>
+        <div class="send"><button class="btn" type="submit" id="fb-send">Send anonymously</button><small id="fb-msg">Even one answer helps.</small></div>
+      </form>
+      <div class="fb-done" id="fb-done" hidden><p><b>Got it. Thank you.</b> We read every answer.</p></div>
+      </div>
+    </details>
+  </section>
+
+  <footer>
+    <span>HALO private beta · Acme Inc. · Dec 10</span>
+    <span>Do not forward</span>
+  </footer>
+</div>
+
+<script>
+/* Photo reel: swipe or tap PREV/NEXT; the centered photo lights up. */
+(() => {
+  const reel = document.getElementById("reel"); if (!reel) return;
+  const slides = [...reel.querySelectorAll(".slide")], n = slides.length;
+  const count = document.getElementById("reel-count"), bar = document.getElementById("reel-bar");
+  let cur = 0;
+  const show = (i) => { cur = i; slides.forEach((s, k) => s.classList.toggle("on", k === i));
+    count.textContent = String(i + 1).padStart(2, "0") + " / " + String(n).padStart(2, "0"); bar.style.width = ((i + 1) / n * 100) + "%"; };
+  const go = (i) => { i = (i + n) % n; slides[i].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" }); };
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) show(slides.indexOf(e.target)); }), { root: reel, threshold: 0.6 });
+  slides.forEach((s) => io.observe(s));
+  document.getElementById("reel-prev").onclick = () => go(cur - 1);
+  document.getElementById("reel-next").onclick = () => go(cur + 1);
+  reel.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") { e.preventDefault(); go(cur + 1); } if (e.key === "ArrowLeft") { e.preventDefault(); go(cur - 1); } });
+  /* Tap a photo: open it large on the page (no new tab). */
+  const lb = document.getElementById("lightbox"), lbImg = document.getElementById("lb-img"), lbCam = document.getElementById("lb-cam");
+  let lbi = 0;
+  const lbShow = (i) => { lbi = (i + n) % n; const im = slides[lbi].querySelector("img"); lbImg.src = im.getAttribute("src"); lbImg.alt = im.alt;
+    lbCam.textContent = "REC · CAM " + String(lbi + 1).padStart(2, "0"); };
+  slides.forEach((s, k) => s.querySelector("a").addEventListener("click", (e) => { e.preventDefault(); lbShow(k); lb.showModal ? lb.showModal() : lb.setAttribute("open", ""); }));
+  document.getElementById("lb-close").onclick = () => lb.close();
+  document.getElementById("lb-prev").onclick = () => lbShow(lbi - 1);
+  document.getElementById("lb-next").onclick = () => lbShow(lbi + 1);
+  lb.addEventListener("click", (e) => { if (e.target === lb || e.target === lbImg) lb.close(); });
+  lb.addEventListener("keydown", (e) => { if (e.key === "ArrowRight") lbShow(lbi + 1); if (e.key === "ArrowLeft") lbShow(lbi - 1); });
+  lb.addEventListener("close", () => go(lbi));
+  let tx = null; lb.addEventListener("touchstart", (e) => { tx = e.touches[0].clientX; }, { passive: true });
+  lb.addEventListener("touchend", (e) => { if (tx === null) return; const d = e.changedTouches[0].clientX - tx; if (Math.abs(d) > 40) lbShow(lbi + (d < 0 ? 1 : -1)); tx = null; });
+  show(0);
+})();
+</script>
+<script>
+/* Feedback form: anonymous. Sends only the answers (no name, code or role) to FEEDBACK_URL. */
+(() => {
+  const FEEDBACK_URL = "https://formsubmit.co/ajax/1ea06d0a4649014919c2b367dc36ed31";
+  const form = document.getElementById("fb-form"); if (!form) return;
+  const msg = document.getElementById("fb-msg"), btn = document.getElementById("fb-send");
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries([...new FormData(form)].filter(([, v]) => String(v).trim()));
+    if (!Object.keys(data).length) { msg.textContent = "Answer at least one, even a word."; return; }
+    if (CONFIG.demo) { form.hidden = true; document.getElementById("fb-done").hidden = false; return; }
+    btn.disabled = true; msg.textContent = "Sending…";
+    try {
+      const r = await fetch(FEEDBACK_URL, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ _subject: "Heartware event feedback (anonymous)", _template: "box", _captcha: "false", ...data }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || String(j.success) === "false") throw new Error(j.message || r.status);
+      form.hidden = true; document.getElementById("fb-done").hidden = false;
+    } catch { btn.disabled = false; msg.textContent = "That didn't send. Try again in a moment."; }
+  });
+})();
+</script>
+<script>
+/* ---- Host config (filled by build.mjs) ---- */
+const CONFIG = /*CONFIG*/{"demo":true,"client":"Acme Inc.","contactName":"Jordan Lee, Acme People Team","contactEmail":"events@acme.example","rating":"PG-13","danceFloor":false,"fireWord":"fire","calendar":{"title":"HALO private beta (Heartware x Acme)","start":"20261211T013000Z","end":"20261211T040000Z","location":"Acme HQ, 4th floor Commons","details":"Your secret role and everything else: see the event page. Bring your access code."},"djInviteUrl":"","playlistUrl":"","demoCodes":[{"label":"HACKER","code":"HAK-247"},{"label":"LEAKER","code":"LEK-318"},{"label":"AUDITOR","code":"AUD-552"},{"label":"CO-FOUNDER","code":"COF-610"},{"label":"COMPANION","code":"CMP-774"},{"label":"LAWYER","code":"LAW-139"},{"label":"WITNESS","code":"WIT-862"},{"label":"EMPLOYEE","code":"EMP-405"}],"live":true}/*END*/;
+/* ---- Encrypted roster: each entry only opens with the guest's private access code ---- */
+/* ---- Board vote results (published from the host panel) ---- */
+const GUESTS = /*GUESTS*/["Aisha Rahman","Ben Cohen","Carlos Diaz","Chloe Dubois","Dev Patel","Ethan Reed","Fatima Ali","Grace Kim","Hannah Muller","Isabel Cruz","Jamal Brooks","Kofi Mensah","Lena Park","Leo Novak","Marcus Chen","Mei Lin","Nina Petrova","Noah Williams","Omar Haddad","Priya Shah","Ravi Iyer","Sam Okafor","Tomás García","Yuki Tanaka","Zoe Martin"]/*END*/;
+let RESULTS = /*RESULTS*/{"teams":[],"closed":false}/*END*/;
+const ROSTER = /*ROSTER*/{"v":1,"iter":600000,"salt":"sPukaZ0WW6B5CcYARMzlJw==","entries":{"de6533fcd587bf993378e658af906ff4":"t775Br01LXSeKMGgGdzgyyjkBD/ElGY64v5gra+WCW+Q/EZcQSnAlNooy3N5RWuJRdkdWXi84DrJijSti4/1WrnWeAyPbNLzDx3EVY0RKduY2nNDCx4ADnEDEb7o9icWaFpqtN8dC+xbSzaqA4PW+bWeRyji8LHRffY0Yx45b7rguQk9Ugd1gbiadyIAvsbF","33d21104f253150aa04bde3e46cecc65":"kJh5LXmFFZcBadS64hMmsu5lvhAVd/92D5YBm+3rXhPi4PgrdfdgIBx+BZrERKV3T+OeRnxbgFR5oROE4/OKDrribG7ZasQCF2SgYr0qyod0+CK4y5eDg5tIk+qlcZbeoA1gE5h+NUBO/9Ey+2gXt9TH9+uuPsG4H4lnCO+AQzzBGuk=","269b2baef1541f18d408d727b0f036a2":"wSRDPUK2VEQslJA/+VMWcB6RzNf4ekshZjbFyAprJFWMxfvXYdEHgf51BUk48DYzuzdKwrHJktu15DX321aRcs8ng+dQjQFT1IiC67YEBCyhDIKmzmXJRyKRgPQeiwEF+ePNe92VbFfJIUGfbB+Xk1EavxOvod8XtG5kg12H3UEQug==","4c7517f3240bf0644106051aa54c0d02":"n1oCjHZWP4Vp5SNxNSWxsps5aqrA8MwUGz2c2FNTI7fc2ZDEpl3cvY9E4J7d35qwN9T4GvhV5iy3P9r65ki4DRr3zXOfOBUgIbEoeVux/TXERnBxzNKJYh16Tia/Ft7E5+myhph4brd+P2qU+B0CuhEbltYpfWFMXfY7aPltkc4XxIam89QJ6F7W85JFbMgJmqpyAkuw8OHJ/9Gl5KBcq2QvzRLbktW4N7xZ/f3nK6ZRp01xnj74IwqU9LtsLp+yw5upr3ou","8ac8f3c5b49f9c3f306133a4af336897":"VgxV7aKR5Vqk5bEHh4I3jvm0h9K7AtNzZro9jL1xZbsVhlxg5VYXZfLqJMVCiIOUFkK9EX3XBJMNho+p6nYs6XgoD66eTcCjwHirQxj1HfjA9xG1/0uEIikbZVPskygEV22ZR8hmEXiJUXgsFIeSbaJGIkl9OPbCw35AELfeIgjSmgt3FFjkYfQHFbqjWC5pnralbdhtXzG2dSXnH13OlxVz+ei0hWFIMWjNYyVcSXz8llyAvGFCdTxa/nMLUhjrtQjJBqXqMrVf6UfXFlIx","d4f84e883b963d24ba0104027fdea569":"K3BoZ1Mf75tPUFzJ0S56O8tZ12dt98GR3AjfMrAGbCy8jIIs+F67lLW/6rjS8LXk8o/w7L/z99Tc9kU+3KzwMf1hZfb2EOcIv0KQ/8FGqr4PPkaZcU3FsOQE+4Xa2KmWMsO0GONjj9qkPaa6ISug2ioFBBcUesDJQOYEguuMGc5L4BEt6riGszCOseVSSqK1ohwWQWW3PCDFOV+/dWcYAIEcIIw5qiT12Y0QVw2BPWLKTZBNKbRJlQIYgSUBSnk7h3EWWmytvWSB+g==","0e227724911fcc377108d18a73f56813":"Ov/npgRSJOmFmHWQ9dYsbT6pnyBN4/RiySx/brgRAq80kUDc02YvzT3t4VvzSvCxGZQ0SoJChk86ieoXHwyQy5sixNMr2kbiSwHi5dKYcx4DlbMChOk2tt7p1vJC2yYs2vO0PpYOrUwnZ11uuWjcs9FH2+Oc6Ys5WkWn5aAZHiM75wbCd7c6TNJ3vQN8YII=","c6683ed1c3b498e3680456539c0b439c":"L5tlyEQo1TWuDs6ko6ajiv5Z/y/awpBp1+NzntDrPVX9OCtZg9CrxGbW5BPyxqmAj6VC89qvELQr2rt3Rzj5hbc1idtHMtzNbAPz0Z8QkyCS2wCXRR+ZRo7JwoX61MQJ3K8sxQIwJlM1ApWyx2OBiKaqhNDS19C3Epuo66TGG2pq0p5vyNyXqkPeKuGIPoWKuq2Sl6m1rve8/WobBbqjguCVGJLcaxvSe9IMwQ5yNNxboKz7+gkX1w==","dc9ac6b3ff31f933bba20cf8b5b800d5":"Iyqp+XgIN9IRPK+rRhtzWgi5pB368e/yKp5HvGHT4atsAp2qaH3TcniNokIvTYNd/vaem38Sc87hKX+Unygaa3ZehLAFs+UdzF+9cUb1KfwtOI0XxcshhjcvEZQNLrbB3WK/3FgmDf6S21dnyxibgWfcdcLGSltkGrGEBwOTp/EFdzWZl32p","dd4eaa87619dc5ea03e52654207dca26":"pny19IHB0uKx91oj24QDpGOt0fNelsg4jO9+zBTi0r05EfW7ZUU0Lq+YHuhZaw+wfrjzb4kZUX+q3jcuTkqlq2PV4Bmz1SCb3iICZkUuXSiBK8ZGyzrUJSzCeO0aYDjKoXCUPeX3VtEBcBsPRqAYtPY3RcVDa6y/FFd1Ke5vqITeKQ==","aa80e980fe644db59fd0c0f373db6444":"g8In+H7/9MEYvquWvrY2SiQdFDR5YLI05p/7GNigq1/Kf/03yK5dJ3wfZHbL9GwmSwubGG9tPA0ig0fv11fKXafMJ3MyWBjroVAP3bi9yzy8S+LZ8IaitbhQF+g7JRx1WcRTU2q4/nkhw8V7o9kHeTB4+3KD4Wzdo8+3E3uj6NraohS2I/IPMdmmbxvczxWPvbQvkSnrYKJ7b7E/LtSBGDIZZ6zu63bJ4Alr3mjMWJ5Lyq253c+gHxOBE/NyCerahIKwu6urMGxs","105356d3ed7c0672469b7a4d124cf570":"PcoNov8PICbQASk+Ab90FqAsguyxbGuzjy3OBALdsZfridvPdXccyoKHHucbdho2AqG8Dgjt2Gidw1taf2Ozy3mAj12Qd3V9bJK936XfMy7QnOIQ5h0Ci3HKB/OQCidQCxH9ecACF7QVOeT0LN+EuEcBD2QWqUAkUNIxtvQYkKrUW/XSkEioez3lZFo=","45a9b7f042e7122a8d767e1c57c374bb":"309Bda/ucEm4cNUyaYHpCaqPT5mDnzgYcVS9hgOqtYCKyXgZll3k0+SYvVRrE9fpQeIsWM8MjSZFfP7CfRlqUCQBIVSk0CkNW3n7rWD5k5CGgryqA0uN5NUHiBcQ0l5q3HicOiDYaaDVp7aZuKYu4855qjmSri0qwaJbV3GxQzwPnPkFYKqRboO4OIVVSKoURtJJ2SufB1AZ5DxQH/fc7btc70eROdj0PHXMLD7+bN6YQvvT7V7pzy9m+CyMp7VYkFq0k2r4HfM=","84006425a1eedc2e0dfc2258f387d33b":"J8lgFx52WHc4Tfwe6NxSAfF4UgV6pfJygCt9QZMnE53DHbTEPoOel6/bzpnXpakXv4U/459ngeYepweT1byjfIeRep+6iWxKFoDXbv9RBzmkA7dnfSIQjxL7f9P0SMtcX3mXlp06nfpKKGq+xHsFXQufgp64z3oyuAA9oDvT9U0EPq86v5fAgmVPvrmJHTKyym6TtGrx9g==","d04e72998fe46acac1d6ed9222fccf1e":"nUkgjzK2SMdxXsp8N2QCHRO7iigVSYrTdeT4s/Zjs67Ao3U+DbNpR/hWr/AfGF+GodD+cG5s3QSZEpwGfa/1FYizB897ExcC6gSs2PFO5hXrBz7VJq9edYC6ifrtozKfZemtO4i8BNQ25e9++ut0XprbJXkdEUN8+s20yvoMLpOUEuH6SOjHh1MMW8gsCoD1cgvCAXH6BMG/SnF0SGQxxoxtPM2uoaN18q2qmox8aqNQrlUQNDDVgVkKj+CTjmDXehGJ2+FBMaP05O4R","b1b1728a639142bec8f09044b9e1ec4d":"sgZCdG5/zuqD8o8O2UzWnlepDPK+OmPUXOJq8MlW6sgdKzkj0563sdSDpREPevknZ+8M9nvR5xBecIo3jLJVUMZbXIlkr8s+NvbZbBho4UPjmY3b8hrr816mokk05tvYlfgabLoIntGP6qAvU+tXIqGahV4sz7LhTvnIs65Re3PWIqU=","5895fca049f0aa67e36ebfc1ecc725ee":"1xt3thvzoi0gKyEa0sTF+pyhVq3PYbpu15d29BXj7wnKYMfASRZ6hi1HhhebwpHSOh2B0oefXtVIW+9dOPYGw2cdG/QYiJP+lGzNxyx3NjroRm5S+IN5d9qdJibC0HlVyUZ2adFfKJlLyFYoNrqqOA3v6NTvkPMaTfrnwX/jg0J/GDUj6GBDuHnUXJlU80SoQqZv14YDaqrdWgNEOObOGRrU2JPuikVP026em7FZCSsusHMH/68xM4EaBo37BYFjaLQ5YVxyv3OVUtk=","237cde0eb04288662e2540dddd3d3c58":"ro3LbAcfLko/k6vLe/g6DPZjysxjT62nbDsQZokopl3rfjrJsG2MjNHTjxt5gHiCCDJ27kKT5WWMfWHdleDsFFwdnTY6DzqRYz2gRgjs","406c04d5dceb3b52836bdb7deb78cc29":"QkcpwlavaAJoBc5ouy73cw8UyQ8ViyE5rvkQeqEgEGyYx32YkA7IKltbLe67x3GvLAFxdUSJ8YzKPd1Bqc2uTxZEBfDExYfwlcn0jvic16J5yNUcgu1RJGyq4hAPlhf4KPTPDEd9r2+0AijtZFaqJoOx8YNRYJGSedVwUZcwaBbWGkdfOj/Q5PGv6DPu5SmxdjaqaNABvswbOEWyKaZ6G26HuoBjPBbZhGkus5klkqWb+hgGbZ7nm+T/sfI1tZCZu5gBWEfIim4hL8ePfs5brkvdqHHG","512d21e6d71e7cfbaf0e7df14b71bf0f":"XR9UvB4SMz9pnJGwKTKA0jU2XnkJX+I4vAY4ohTW2PLr2DJ4h95Lnc/E6/sZ5F+VcPunrt4qxS7jxh8i7kqMyrkt3zbzQrslzUdMpFvooHu9ddtHe38CYQBpngtpYuBGkyPXuBKVN2/8j4LLKXYppvH5BxR/N7/YXupCGH2lUUGmSklF0hzyrhXRowsvdlILWO8JakN5MzE23Cw9ZfbzocgaKyluT1YLxTiJXzhXUNrb1/QjcEK2xeD4WYRvskWvGGOjGgrUDfabv2jCgOHiafaboLga9fvE","dbd356e76edc02b453c88b3f5f8034b1":"b9qRSWGDMHHNraKyXwgWvbv+wFZsILdG1Igpuhvnorg6Yim8L75V9v3k1RlMf9fYZ3ctvHlGdF1hWMuCndjoY3Qy1cZ0uSBfxHHlCfmS4EhGBJlj6CnTlMwnD9DGBqCeUc7JOZ+6ZkvD3ynmydaFXvWUXXiFSE9eIvGWqgPvcOJAl44VaxUUGry3","65d1b99844bcec88daaf49cde0b3f5c0":"EPtZTwmcYnReRZELblBjOQRbBnUWMDZOZiih7m6LdqH1Lvr5eKIIQuOEIdNHxGv+CiLNPU2LTw+KVDdWodWx66oB2p3Gsuw1lLn2GaiSf6sGHiPVQEbLhgx+TIQNeV8xfRfVjxR4+aYGqmZsO9TL9qaL4dl1GWg9wUKTsTj9ywb3sZFPZ6WNcnI4l4XT30QfVV/IqFeb8y8UZcjpzhpYkjcx2VnDetpwrFmVg+loppJnJFQLusY5YrG9LCBvghgEWGJTWDGoWq1YCYICzH3hjPpNqgSRjQP3dw==","9ce48b5cde6d41a5ad2afc4fbcaa1aff":"7kOxbqtoYj75fR1oaexggrlmOAruGFHzlsnLa2QYCeMMAz3h4uLbVy9SblRZch5ucw3YDrhwOmrAsxBau7TwbruLoFG0X7eRIDUEkBgtxZmCklhtzw1+iTKieSzTIaCSG7qOjs1cdty1oGn3DW+s2z/19bacN3ib3AsOU/bydc1oN7OT8r088nZ+Gl6H01MVNZMXVTTUYE9LJ1FOnLpG/8VL","7640e8b9efabd02ebeaedea6c92bbf97":"XVHPrJc2b0gl2isQcWURE+QAufqxYPGmI+iqfz8hJsXAN3XR1c4wpr22RaXlPjLdFScWlrVh3ygglR9QoWqGxnoHohz3zbTXp00cZpsQFeF0TwOddyoMXA+fZXq9USwFzTgxSqkpYLW8DY1Fom78Ewu3vdpbz3ix+WWQ7AwrGrso6LoniOz4DOOggFqE1G7NTx/NSVra5yrorMgjpSpJbNya/g7U30qP37Nc36hDfd7TajcUlVV+e54yIqw0I2LhtRjuoK1suUU=","2304e9b680bf66d6af68ddaad44636c5":"8xdzeVO1MDv31FXl9IzlMz88aiKqZV8UeT94DhZTLnUCiVMH2bH+m9yG3SdpOLJ/vAaaZB3mbE9Vzc6Ue6ppVgJR0Q5O1IedipvlR1aADOuiq/HwqJJ47xK3u1R1IvkuBWr/65+w1qa27iQvSWnHrwDRLpA1sQklAYZcHNzvx+l+9OKrTNVho9DBeoi6NAn7Wkg4+B/tnMYk++Rl0L+oXIpCVsfyqyV8XcWBM2sGvhQAoyDbBr9vTbXOSNIu4L9X2QSNdn2dB0TxmUhKq+odbt1Fv/w="}}/*END*/;
+
+const ROLES = {
+  hacker:    { name: "Hacker", color: "var(--hacker)", tag: "Secret · bad guy",
+               text: "You and your fellow Hacker secretly prompt-injected HALO. Something is going to go wrong at the launch. When it does, it was you. Blend in, protect each other, lie.",
+               win: "No Hacker gets fired." },
+  leaker:    { name: "Leaker", color: "var(--leaker)", tag: "Secret · bad guy",
+               text: "You know who the Hackers are, but the Hackers don't know who the Leaker is. Cover for them, spread rumors, point fingers anywhere else.",
+               win: "No Hacker gets fired." },
+  auditor:   { name: "Auditor", color: "var(--auditor)", tag: "Secret · good guy",
+               text: "You found something in the logs: one of two names is a Hacker, the other isn't. Decide who to trust with that.",
+               win: "A Hacker gets fired." },
+  cofounder: { name: "Co-founder", color: "var(--cofounder)", tag: "Secret · good guy",
+               text: "You and the other Co-founder know you're both innocent. Vouch for each other and lead the hunt.",
+               win: "A Hacker gets fired." },
+  companion: { name: "Companion", color: "var(--companion)", tag: "Secret · loyal",
+               text: "You're a HALO companion robot. A Hacker secretly programmed you to protect them. Protect your Hacker at all costs. Act as suspicious as you can and get yourself fired instead of them.",
+               win: "The Companion gets fired." },
+  lawyer:    { name: "Lawyer", color: "var(--lawyer)", tag: "Secret · solo",
+               text: "You have a secret client. You don't know their role, and it doesn't matter. Keep them from getting fired.",
+               win: "Your client isn't fired." },
+  witness:   { name: "Witness", color: "var(--witness)", tag: "Secret · good guy",
+               text: "You saw something. You know for sure that one person is not a Hacker. Trade it, vouch for them, or keep it up your sleeve.",
+               win: "A Hacker gets fired." },
+  employee:  { name: "Employee", color: "var(--employee)", tag: "Good guy",
+               text: "No secrets, pure instinct. Talk to everyone and figure out who's lying.",
+               win: "A Hacker gets fired." },
+};
+ROLES.intern = ROLES.halo = ROLES.companion;
+
+const $ = (id) => document.getElementById(id);
+const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const hex = (u8) => Array.from(u8, (b) => b.toString(16).padStart(2, "0")).join("");
+
+function normalizeCode(raw) {
+  return String(raw).toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+async function unlock(code) {
+  const enc = new TextEncoder();
+  const base = await crypto.subtle.importKey("raw", enc.encode(code), "PBKDF2", false, ["deriveBits"]);
+  const bits = new Uint8Array(await crypto.subtle.deriveBits(
+    { name: "PBKDF2", hash: "SHA-256", salt: b64(ROSTER.salt), iterations: ROSTER.iter }, base, 512));
+  const id = hex(bits.slice(32, 48));
+  const blob = ROSTER.entries[id];
+  if (!blob) return null;
+  const raw = b64(blob);
+  const key = await crypto.subtle.importKey("raw", bits.slice(0, 32), "AES-GCM", false, ["decrypt"]);
+  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: raw.slice(0, 12) }, key, raw.slice(12));
+  return JSON.parse(new TextDecoder().decode(plain));
+}
+
+function el(tag, attrs = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === "style") n.style.cssText = v; else if (k === "class") n.className = v; else n.setAttribute(k, v);
+  }
+  for (const k of kids) if (k != null) n.append(k);
+  return n;
+}
+
+function showMessage(kind, text) {
+  $("result").replaceChildren(el("div", { class: "verdict " + kind }, text));
+}
+
+function showRole(g) {
+  const base = ROLES[g.role] || ROLES.employee;
+  // Witnesses see their private job title; the public role list still just says Witness.
+  const r = g.title ? { ...base, name: g.title, tag: "Witness · good guy",
+    text: (g.flavor ? g.flavor + " " : "") + "You know for sure that one person is not a Hacker. Trade it, vouch for them, or keep it up your sleeve." } : base;
+  const box = el("div", { class: "role-hit", style: "color:" + r.color },
+    el("span", { class: "who" }, "Access granted · " + (g.name || "beta tester")),
+    el("span", { class: "name" }, r.name),
+    g.line ? el("div", { class: "secret" }, el("span", { class: "label" }, "What only you know"), el("p", {}, g.line)) : null,
+    el("div", { class: "card-hit" },
+      el("span", { class: "tagline" }, el("b", {}, r.tag)),
+      el("p", {}, r.text),
+      el("div", { class: "how" }, el("span", { class: "label" }, "How you win"), el("p", {}, r.win))),
+    el("ul", { class: "todo" },
+      el("li", {}, "Keep this to yourself. Don't show your screen."),
+      el("li", {}, "Re-read it before the event. On the night you'll join a small team of mixed roles to hunt with."),
+      el("li", {}, "Questions? Ask " + (CONFIG.contactName || "the event contact") + "."))
+  );
+  $("result").replaceChildren(box);
+}
+
+$("lookup-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const code = normalizeCode($("phone").value);
+  if (code.length < 6) { showMessage("bad", "Access codes are 6 characters, like ABC-123. Check your invite and try again."); return; }
+  if (!CONFIG.live || !ROSTER.salt) { showMessage("wait", "Roles haven't been assigned yet. Check back the week of the event."); return; }
+  const btn = $("lookup-btn");
+  btn.disabled = true; btn.textContent = "Verifying…";
+  showMessage("wait", "> scanning employee records…");
+  try {
+    const g = await unlock(code);
+    if (g) showRole(g);
+    else showMessage("bad", "That code didn't match anyone. Check your invite, or ask " + (CONFIG.contactName || "the event contact") + ".");
+  } catch (err) {
+    showMessage("bad", "Something went wrong reading your record. Ask " + (CONFIG.contactName || "the event contact") + ".");
+  } finally {
+    btn.disabled = false; btn.textContent = "Reveal my role";
+  }
+});
+
+/* DJ links */
+(function () {
+  const row = $("dj-cta");
+  if (CONFIG.djInviteUrl) {
+    row.append(el("a", { class: "btn", href: CONFIG.djInviteUrl, target: "_blank", rel: "noopener" }, "Add songs on Spotify ↗"));
+  } else {
+    row.append(el("span", { class: "pending" }, "Song adding opens the week before the event."));
+  }
+  if (CONFIG.playlistUrl) row.append(el("a", { class: "btn ghost", href: CONFIG.playlistUrl, target: "_blank", rel: "noopener" }, "Hear the playlist ↗"));
+  $("song-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const q = $("song").value.trim();
+    if (!q) return;
+    const a = el("a", { href: "https://open.spotify.com/search/" + encodeURIComponent(q), target: "_blank", rel: "noopener" });
+    document.body.append(a); a.click(); a.remove();
+  });
+})();
+
+/* NDA download: the save dialog where the viewer supports it, else open the PDF in a new tab */
+(function () {
+  const btn = $("nda-dl"), status = $("nda-status");
+  const openPdf = () => { const a = el("a", { href: "nda.pdf?v=3", target: "_blank", rel: "noopener" }); if (!window.claude) a.setAttribute("download", "Heartware_Beta_Tester_NDA.pdf"); document.body.append(a); a.click(); a.remove(); };
+  btn.addEventListener("click", async () => {
+    const dl = window.claude?.use ? await claude.use("downloads") : null;
+    if (!dl) { openPdf(); return; }
+    btn.disabled = true;
+    try {
+      const res = await fetch("nda.pdf?v=3");
+      if (!res.ok) throw new Error(String(res.status));
+      await dl.save({ filename: "Heartware_Beta_Tester_NDA.pdf", data: await res.blob() });
+      status.textContent = "Saved";
+    } catch (e) {
+      if (e && e.code === "declined") status.textContent = "Download canceled";
+      else openPdf();
+    } finally { btn.disabled = false; }
+  });
+})();
+
+
+/* ---- Verdict ---- */
+const setMode = () => document.documentElement.classList.toggle("tally-mode", location.hash === "#tally");
+setMode(); window.addEventListener("hashchange", setMode);
+const TEAMS = [1, 2, 3, 4, 5];
+const keyOf = (n) => n.trim().toLowerCase().replace(/\s+/g, " ");
+
+function tallyOf(teams) {
+  const counts = new Map();
+  for (const t of teams) {
+    if (!t.suspect) continue;
+    const k = keyOf(t.suspect);
+    const c = counts.get(k) || { name: t.suspect.trim(), n: 0 };
+    c.n++; counts.set(k, c);
+  }
+  return [...counts.values()].sort((a, b) => b.n - a.n);
+}
+
+function renderVerdict() {
+  if (!$("verdict-body")) return;
+  const locked = RESULTS.teams || [];
+  const done = RESULTS.closed || locked.length >= TEAMS.length;
+  let seen = null;
+  try { seen = JSON.parse(sessionStorage.getItem("hw-seen") || "null"); } catch (e) {}
+  const slots = el("div", { class: "slots" });
+  for (const n of TEAMS) {
+    const t = locked.find((x) => x.team === n);
+    if (t) {
+      const fresh = Array.isArray(seen) && !seen.includes(n);
+      slots.append(el("div", { class: "slot" + (fresh ? " new" : "") },
+        el("span", { class: "tn" }, "TEAM " + n),
+        el("div", {}, el("div", { class: "sus" }, t.suspect), t.why ? el("p", { class: "why" }, "“" + t.why + "”") : null)));
+    } else {
+      slots.append(el("div", { class: "slot sealed" },
+        el("span", { class: "tn" }, "TEAM " + n),
+        el("div", {}, el("div", { class: "sus" }, done ? "NO VOTE" : "WAITING"), done ? null : el("div", { class: "bars" }, el("span"), el("span")))));
+    }
+  }
+  try { sessionStorage.setItem("hw-seen", JSON.stringify(locked.map((t) => t.team))); } catch (e) {}
+  const body = $("verdict-body");
+  body.replaceChildren(slots);
+
+  const tally = tallyOf(locked);
+  const max = tally.length ? tally[0].n : 0;
+  if (tally.length) {
+    const box = el("div", { class: "tally" });
+    for (const c of tally) {
+      box.append(el("div", { class: "bar" + (c.n === max && max >= 2 ? " lead" : "") },
+        el("span", { class: "nm" }, c.name),
+        el("span", { class: "track" }, el("span", { class: "fill", style: "display:block;width:" + (c.n / TEAMS.length * 100) + "%" })),
+        el("span", { class: "ct" }, String(c.n))));
+    }
+    body.append(box);
+  }
+  if (done) {
+    const fired = tally.filter((c) => c.n === max && max >= 2).map((c) => c.name);
+    body.append(fired.length
+      ? el("div", { class: "fired" }, el("span", { class: "label" }, "Terminated by the board"), ...fired.map((f) => el("div", { class: "who" }, f)), el("p", {}, "Now let's find out who they really were."))
+      : el("div", { class: "fired" }, el("span", { class: "label" }, "No majority"), el("div", { class: "who" }, "Nobody fired"), el("p", {}, "No one was named by two or more teams.")));
+  } else if (!locked.length) {
+    body.append(el("p", { class: "note" }, "No votes yet. They appear here live as teams lock in."));
+  }
+}
+renderVerdict();
+
+/* ---- Event details from config.json: contact, calendar, content rating, add-ons ---- */
+(function () {
+  const contact = CONFIG.contactName || "the event contact";
+  $("contact-name").textContent = CONFIG.contactName || "";
+  $("contact-email").textContent = CONFIG.contactEmail || "";
+  document.querySelectorAll(".contact-inline").forEach((n) => { n.textContent = contact; });
+  $("advisory-contact").textContent = "Tell " + contact + ".";
+  if (CONFIG.calendar) {
+    const c = CONFIG.calendar;
+    $("cal-link").href = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + encodeURIComponent(c.title)
+      + "&dates=" + c.start + "/" + c.end + "&details=" + encodeURIComponent(c.details || "") + "&location=" + encodeURIComponent(c.location || "");
+  } else $("cal-link").hidden = true;
+  if (CONFIG.danceFloor) $("sched-dance").hidden = false;
+  if (!CONFIG.demo) $("demo-bar").hidden = true;
+
+  // Movie-style rating. The organizer picks one level per event.
+  const LEVELS = [
+    { r: "G", what: "System crash. The CEO's demo glitches, the lights go red and the CEO goes offline. No blood. The investigation starts the same way." },
+    { r: "PG", what: "Announced death. Guests are told at check-in that the CEO will die on stage. Brief stage blood, no sudden sounds." },
+    { r: "PG-13", what: "Surprise death. The CEO collapses mid-keynote with a little stage blood, a loud sound cue and red lights. Guests know a dramatic incident is coming, not when." },
+  ];
+  const pick = LEVELS.find((l) => l.r === CONFIG.rating) || LEVELS[2];
+  $("rating-chip").textContent = pick.r;
+  $("rating-big").textContent = pick.r;
+  $("rating-desc").textContent = pick.what;
+  $("rating-note").textContent = "Also includes mild peril and corporate satire. The CEO recovers before the night is over.";
+  const rows = $("rating-rows");
+  for (const l of LEVELS) rows.append(el("tr", { class: l === pick ? "on" : "" }, el("td", {}, l.r), el("td", {}, l.what)));
+
+  // Demo access codes, one per role.
+  if (CONFIG.demo && Array.isArray(CONFIG.demoCodes)) {
+    const row = $("code-row");
+    for (const d of CONFIG.demoCodes) {
+      const b = el("button", { type: "button" }, el("b", {}, d.label), d.code);
+      b.addEventListener("click", () => { $("phone").value = d.code; $("lookup-form").requestSubmit(); });
+      row.append(b);
+    }
+    $("demo-codes").hidden = false;
+  }
+})();
+
+/* ---- Team captains vote on the page (demo: stored on this device only) ---- */
+(function () {
+  const list = $("guest-names");
+  GUESTS.forEach((g) => list.append(el("option", { value: g })));
+  const KEY = "hw-demo-votes";
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(RESULTS)); } catch (e) {} };
+  try { const v = JSON.parse(localStorage.getItem(KEY) || "null"); if (v && Array.isArray(v.teams)) RESULTS = v; } catch (e) {}
+  renderVerdict();
+  const msg = (t) => { $("vote-msg").textContent = t; };
+  $("vote-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const team = Number($("vote-team").value), suspect = $("vote-sus").value.trim();
+    if (!team || !suspect) { msg("Pick your team and type a suspect."); return; }
+    if (RESULTS.teams.some((t) => t.team === team)) { msg("Team " + team + " already voted. First vote counts."); return; }
+    RESULTS = { teams: [...RESULTS.teams, { team, suspect, why: $("vote-why").value.trim() }].sort((a, b) => a.team - b.team), closed: false };
+    save(); renderVerdict();
+    $("vote-sus").value = ""; $("vote-why").value = ""; $("vote-team").value = "";
+    msg("Team " + team + " is locked in.");
+  });
+  let timer = null;
+  $("vote-sample").addEventListener("click", () => {
+    clearTimeout(timer);
+    const names = GUESTS.length ? GUESTS : ["Avery", "Jordan", "Sam"];
+    const a = names[3 % names.length], b = names[7 % names.length];
+    const sample = [
+      { team: 2, suspect: a, why: "Changed their story about where they were at 6:10." },
+      { team: 4, suspect: b, why: "Too calm when the lights went red." },
+      { team: 1, suspect: a, why: "Their lawyer wouldn't stop talking." },
+      { team: 5, suspect: a, why: "Two Witnesses cleared everyone else at our table." },
+      { team: 3, suspect: b, why: "" },
+    ];
+    RESULTS = { teams: [], closed: false }; renderVerdict();
+    let i = 0;
+    const step = () => {
+      RESULTS = { teams: [...RESULTS.teams, sample[i]].sort((x, y) => x.team - y.team), closed: false };
+      i++; if (i === sample.length) RESULTS.closed = true;
+      save(); renderVerdict();
+      if (i < sample.length) timer = setTimeout(step, 900);
+    };
+    timer = setTimeout(step, 400);
+    msg("Sample vote: five teams locking in.");
+  });
+  $("vote-reset").addEventListener("click", () => { clearTimeout(timer); RESULTS = { teams: [], closed: false }; save(); renderVerdict(); msg("Cleared."); });
+})();
+
+/* Open a collapsed section when someone jumps to it */
+function openSection(hash) {
+  const id = (hash || "").slice(1);
+  const sec = id === "tally" ? $("verdict") : id && document.getElementById(id);
+  const d = sec && sec.querySelector("details.fold");
+  if (d) d.open = true;
+}
+openSection(location.hash);
+window.addEventListener("hashchange", () => openSection(location.hash));
+document.addEventListener("click", (e) => {
+  const a = e.target.closest('a[href^="#"]');
+  if (a) openSection(a.getAttribute("href"));
+});
+document.querySelectorAll(".copy").forEach((b) => b.addEventListener("click", async () => {
+  const label = b.textContent;
+  try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "Copied"; }
+  catch (e) { b.textContent = b.dataset.copy; }
+  setTimeout(() => { b.textContent = label; }, 1800);
+}));
+
+/* Highlight the chip for the section in view */
+(function () {
+  const links = [...document.querySelectorAll("nav.chips a")];
+  const obs = new IntersectionObserver((ents) => {
+    ents.forEach((en) => {
+      if (!en.isIntersecting) return;
+      links.forEach((l) => l.classList.toggle("hot", l.getAttribute("href") === "#" + en.target.id));
+    });
+  }, { rootMargin: "-40% 0px -55% 0px" });
+  document.querySelectorAll("section[id]").forEach((s) => obs.observe(s));
+})();
+</script>
+
+</body>
+</html>

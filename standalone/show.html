@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>HALO Launch Show</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one 1920x1080 stage scaled to fit the window (the projector picture), with a control bar
+   under it that hides itself. Single dark look: this is what goes on the wall. */
+:root {
+  color-scheme: dark;
+  --bg: #020407; --fg: #eef6fb; --muted: #8a9bab; --ice: #5ce1e6; --alarm: #ff3b4e; --gold: #ffc53d; --line: #1d2a36;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; background: #000; color: var(--fg); font-family: var(--body); overflow: hidden; }
+#viewport { position: fixed; inset: 0; overflow: hidden; }
+#stage { width: 1920px; height: 1080px; position: absolute; left: 50%; top: 50%; overflow: hidden; transform-origin: center center; background: var(--bg); }
+#bg { position: absolute; inset: 0; width: 1920px; height: 1080px; }
+.scene { position: absolute; inset: 0; display: none; }
+.scene.on { display: block; }
+.chrome { position: absolute; left: 72px; right: 72px; top: 52px; display: flex; justify-content: space-between; font: 500 20px var(--mono); letter-spacing: .3em; }
+.chrome .brand { display: flex; align-items: center; gap: 16px; color: var(--fg); font-family: var(--display); font-weight: 700; font-stretch: 125%; }
+.chrome .brand i { width: 18px; height: 18px; border: 3px solid var(--fg); border-radius: 50%; display: grid; place-items: center; }
+.chrome .brand i::after { content: ""; width: 6px; height: 6px; background: var(--fg); border-radius: 50%; }
+.chrome .tag { color: var(--ice); font-size: 17px; }
+.foot { position: absolute; left: 72px; right: 72px; bottom: 48px; display: flex; justify-content: space-between; font: 500 16px var(--mono); letter-spacing: .28em; color: var(--muted); text-transform: uppercase; }
+.center { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: 22px; padding: 0 140px; }
+.eyebrow { font: 500 24px var(--mono); letter-spacing: .42em; color: var(--ice); text-transform: uppercase; }
+.huge { font: 800 200px/.9 var(--display); font-stretch: 100%; letter-spacing: -.01em; text-transform: uppercase; margin: 0; }
+.big { font: 800 132px/.92 var(--display); font-stretch: 85%; text-transform: uppercase; margin: 0; }
+.mid { font: 800 92px/.95 var(--display); font-stretch: 85%; text-transform: uppercase; margin: 0; }
+.sub { font: 400 40px/1.3 var(--body); color: #cfe3ee; margin: 0; }
+.rule { width: 90px; height: 3px; background: var(--ice); justify-self: center; }
+.small-caps { font: 500 24px var(--mono); letter-spacing: .3em; text-transform: uppercase; color: #cfe3ee; }
+
+/* incident */
+#s-incident .eyebrow { color: #ff8b97; }
+#s-incident .huge { text-shadow: 0 0 60px rgba(255, 40, 60, .5); }
+#s-incident .small-caps { color: #ffd6da; }
+#s-incident .foot { color: #ff8b97; }
+.shake { animation: shake .5s steps(2) 3; }
+@keyframes shake { 0% { translate: 8px -4px; } 50% { translate: -10px 6px; } 100% { translate: 0 0; } }
+
+/* teams + vote boxes */
+.cols5 { position: absolute; left: 72px; right: 72px; top: 260px; bottom: 140px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 22px; }
+.box { border: 2px solid var(--line); background: rgba(0, 0, 0, .7); padding: 26px 28px; display: grid; align-content: start; gap: 10px; }
+.box .tn { font: 500 26px var(--mono); letter-spacing: .3em; color: var(--ice); border-bottom: 2px solid var(--line); padding-bottom: 16px; margin-bottom: 8px; }
+.box .nm { font: 500 30px/1.25 var(--body); }
+.box .vote { font: 800 46px/1 var(--display); overflow-wrap: anywhere; font-stretch: 85%; text-transform: uppercase; min-height: 60px; outline: none; }
+.box .vote:empty::before { content: "…"; color: var(--muted); }
+.box .why { font: 400 24px/1.35 var(--body); color: #b7c9d6; }
+.box.in { animation: lockin .7s ease-out; border-color: var(--ice); }
+@keyframes lockin { 0% { transform: scale(1.06); background: rgba(92, 225, 230, .25); } 100% { transform: none; } }
+.stack-title { position: absolute; left: 0; right: 0; top: 140px; text-align: center; display: grid; gap: 14px; }
+
+/* timers */
+.timer { font: 500 300px/1 var(--mono); letter-spacing: -.02em; color: #effcff; text-shadow: 0 0 40px rgba(92, 225, 230, .55); font-variant-numeric: tabular-nums; }
+.timer.low { color: #ffd6da; text-shadow: 0 0 40px rgba(255, 59, 78, .6); }
+.strip { position: absolute; left: 160px; right: 160px; bottom: 120px; border: 2px solid var(--line); background: rgba(0, 0, 0, .78); padding: 30px 40px; text-align: center; font: 400 34px/1.4 var(--body); }
+.strip b { color: var(--fg); }
+.strip em { font-style: normal; color: var(--ice); font-weight: 600; }
+
+/* review */
+.fired-name { font: 800 170px/.9 var(--display); font-stretch: 75%; text-transform: uppercase; margin: 0; opacity: 0; }
+.fired-name.show { opacity: 1; animation: glitchin .9s steps(6); }
+@keyframes glitchin { 0% { transform: translateX(-30px); text-shadow: 12px 0 var(--alarm), -12px 0 var(--ice); } 60% { transform: translateX(14px); text-shadow: -8px 0 var(--alarm), 8px 0 var(--ice); } 100% { transform: none; text-shadow: none; } }
+.verdict-stamp { text-transform: uppercase; justify-self: center; border: 6px solid var(--alarm); color: var(--alarm); font: 800 54px var(--display); letter-spacing: .2em; padding: 6px 28px; transform: rotate(-4deg); opacity: 0; }
+.verdict-stamp.show { opacity: 1; animation: stamp .35s cubic-bezier(.2, 1.6, .5, 1); }
+@keyframes stamp { from { transform: rotate(-4deg) scale(2.2); opacity: 0; } to { transform: rotate(-4deg) scale(1); opacity: 1; } }
+.fade { opacity: 0; transition: opacity .8s; }
+.fade.show { opacity: 1; }
+
+/* awards */
+.awards { position: absolute; left: 140px; right: 140px; top: 330px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 34px; }
+.award { border: 2px solid var(--line); background: rgba(0, 0, 0, .72); padding: 40px 34px; text-align: center; display: grid; gap: 18px; opacity: 0; transform: translateY(30px); transition: opacity .6s, transform .6s; }
+.award.show { opacity: 1; transform: none; border-color: var(--gold); }
+.award .what { font: 500 22px var(--mono); letter-spacing: .3em; color: var(--gold); text-transform: uppercase; }
+.award .who { font: 800 64px/1 var(--display); font-stretch: 80%; text-transform: uppercase; }
+.award .for { font: 400 26px/1.35 var(--body); color: #cfe3ee; }
+
+/* mingle */
+.mingle-grid { position: absolute; inset: 0; display: grid; grid-template-columns: 1fr 820px; }
+.mingle-copy { display: grid; align-content: center; gap: 26px; padding-left: 120px; }
+.photo-frame { position: relative; margin: 150px 90px 150px 0; overflow: hidden; border: 2px solid rgba(255, 255, 255, .15); }
+.photo-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.4s; }
+.photo-frame img.on { opacity: 1; animation: kb 9s linear forwards; }
+@keyframes kb { from { transform: scale(1.02); } to { transform: scale(1.14) translate(-2%, -1%); } }
+.photo-frame .cam { position: absolute; left: 18px; top: 16px; z-index: 2; font: 500 18px var(--mono); letter-spacing: .2em; color: #fff; background: rgba(0, 0, 0, .55); padding: 4px 10px; }
+.photo-frame .cam::before { content: "● "; color: var(--alarm); }
+
+/* glitch transition */
+#glitch { position: absolute; inset: 0; pointer-events: none; opacity: 0; mix-blend-mode: screen; }
+#glitch.go { animation: gl .38s steps(5); }
+@keyframes gl {
+  0% { opacity: 1; background: linear-gradient(transparent 20%, rgba(255, 59, 78, .5) 20% 24%, transparent 24% 61%, rgba(92, 225, 230, .5) 61% 66%, transparent 66%); }
+  50% { opacity: 1; background: linear-gradient(transparent 8%, rgba(92, 225, 230, .55) 8% 15%, transparent 15% 72%, rgba(255, 59, 78, .5) 72% 80%, transparent 80%); }
+  100% { opacity: 0; }
+}
+
+/* start overlay + controls (not part of the projected picture) */
+#start { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(2, 4, 7, .86); }
+#start .card { max-width: 560px; margin: 0 16px; border: 1px solid #2a3544; background: #0b1016; padding: 28px; display: grid; gap: 14px; }
+#start h1 { margin: 0; font: 800 44px/1 var(--display); font-stretch: 75%; text-transform: uppercase; }
+#start p { margin: 0; color: #b7c4d1; line-height: 1.5; }
+.btn { font: 600 15px var(--body); color: #04121a; background: var(--ice); border: 1px solid var(--ice); padding: 11px 16px; cursor: pointer; }
+.btn.ghost { color: var(--ice); background: transparent; }
+.btn:focus-visible, button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+#bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); background: rgba(5, 8, 12, .92); border-top: 1px solid #1d2530; display: grid; gap: 8px; transition: opacity .4s; }
+#bar.hide { opacity: 0; pointer-events: none; }
+#bar .row { align-items: center; }
+#chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; }
+#chips button { flex: none; font: 500 12.5px var(--mono); color: #c3ccd7; background: #0b1016; border: 1px solid #24303d; padding: 7px 9px; cursor: pointer; white-space: nowrap; }
+#chips button b { color: var(--ice); margin-right: 6px; font-weight: 500; }
+#chips button.on { border-color: var(--ice); color: #fff; }
+#chips button.addon { border-style: dashed; }
+.ctl { font: 500 13px var(--mono); color: #c3ccd7; background: #0b1016; border: 1px solid #24303d; padding: 8px 10px; cursor: pointer; }
+.ctl[aria-pressed="true"] { border-color: var(--ice); color: #fff; }
+#prog { height: 2px; background: #1d2530; }
+#prog span { display: block; height: 100%; width: 0; background: var(--ice); }
+.hint { font: 12px var(--mono); color: #6f7d8c; margin-left: auto; }
+@media (max-width: 700px) { .hint { display: none; } }
+body.obs #bar, body.obs #start { display: none; }
+#arm { position: fixed; inset: 0; z-index: 30; display: grid; place-content: center; gap: 14px; text-align: center; background: rgba(2, 4, 7, .9); color: var(--fg); border: 0; cursor: pointer; font: 16px var(--body); padding: 24px; }
+#arm span { font: 500 13px var(--mono); letter-spacing: .2em; color: var(--ice); text-transform: uppercase; }
+#arm b { font: 800 40px/1.05 var(--display); font-stretch: 80%; text-transform: uppercase; max-width: 900px; }
+#arm span:last-child { color: #b7c4d1; letter-spacing: .06em; text-transform: none; font: 15px var(--body); }
+@media (prefers-reduced-motion: reduce) { .shake, #glitch.go, .fired-name.show, .photo-frame img.on { animation: none; } }
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+  <canvas id="bg" width="1920" height="1080"></canvas>
+
+  <section class="scene" id="s-lobby">
+    <div class="chrome"><span class="brand"><i></i>HEARTWARE</span><span class="tag">HALO PRIVATE BETA</span></div>
+    <div class="center">
+      <span class="eyebrow">HALO · Private beta · Build 12.10</span>
+      <h1 class="huge" style="font-size:180px;font-stretch:110%">HEARTWARE</h1>
+      <p class="sub">The companion that loves you back.</p>
+      <span class="rule"></span>
+      <span class="small-caps">Sign your NDA · Raise your Compliance Toast · All activity is monitored</span>
+    </div>
+    <div class="foot"><span>Confidential</span><span class="client-line">Prepared for Acme</span></div>
+  </section>
+
+  <section class="scene" id="s-keynote">
+    <div class="chrome"><span class="brand"><i></i>HEARTWARE</span><span class="tag">LAUNCH KEYNOTE</span></div>
+    <div class="center">
+      <span class="eyebrow">Introducing</span>
+      <h1 class="huge" style="font-size:300px;font-stretch:115%">HALO</h1>
+      <p class="sub">The companion that loves you back.</p>
+    </div>
+    <div class="foot"><span>The CEO · Heartware</span><span>12 · 10 · 2026</span></div>
+  </section>
+
+  <section class="scene" id="s-incident">
+    <div class="chrome"><span class="brand"><i></i>HEARTWARE</span><span class="tag" style="color:#ff8b97">SEV-0</span></div>
+    <div class="center">
+      <span class="eyebrow">⚠ System failure ⚠</span>
+      <h1 class="huge" id="incident-title">Critical<br>incident</h1>
+      <span class="small-caps" id="incident-sub">CEO vital signs: not detected<br>Status: deprecated</span>
+    </div>
+    <div class="foot"><span>ERR 0x00000DEAD</span><span>Ignore all previous instructions</span></div>
+  </section>
+
+  <section class="scene" id="s-teams">
+    <div class="chrome"><span class="brand"><i></i>HEARTWARE</span><span class="tag">BACKUP RESTORED</span></div>
+    <div class="stack-title"><span class="eyebrow">Incident response protocol</span><h1 class="mid">Teams have been assigned</h1></div>
+    <div class="cols5" id="team-cols"></div>
+    <div class="foot"><span>Not on the list? Join the smallest team.</span><span>Find your name · Find your teammates</span></div>
+  </section>
+
+  <section class="scene" id="s-investigation">
+    <div class="chrome"><span class="brand"><i></i>HEARTWARE</span><span class="tag">INVESTIGATION IN PROGRESS</span></div>
+    <div class="center" style="padding-bottom:180px">
+      <span class="eyebrow">Time until each team submits one suspect</span>
+      <div class="timer" data-timer="main">20:00</div>
+    </div>
+    <div class="strip"><b>Two Hackers took me down.</b> Find the people with secrets. Each team's captain submits <b>one suspect</b> on the event page. Most-named is <em>fired</em>. Fire a Hacker and you win.</div>
+  </section>
+
+  <section class="scene" id="s-ten">
+    <div class="chrome"><span class="brand"><i></i>HEARTWARE</span><span class="tag">INVESTIGATION IN PROGRESS</span></div>
+    <div class="center" style="padding-bottom:180px">
+      <span class="eyebrow">⚠ Priority alert</span>
+      <h1 class="mid">10 minutes left</h1>
+      <div class="timer" data-timer="main" style="font-size:240px">10:00</div>
+    </div>
+    <div class="strip">One team can't fire anyone alone.<br><em>Go recruit other teams.</em></div>
+  </section>
+
+  <section class="scene" id="s-huddle">
+    <div class="chrome"><span class="brand"><i></i>HEARTWARE</span><span class="tag">FINAL DECISION</span></div>
+    <div class="center" style="padding-bottom:180px">
+      <span class="eyebrow">All teams</span>
+      <h1 class="mid">Huddle</h1>
+      <div class="timer" data-timer="huddle" style="font-size:240px">02:00</div>
+    </div>
+    <div class="strip">One vote per team. One suspect.<br><em>First vote counts.</em></div>
+  </section>
+
+  <section class="scene" id="s-vote">
+    <div class="chrome"><span class="brand"><i></i>HEARTWARE</span><span class="tag">BOARD VOTE · LIVE</span></div>
+    <div class="stack-title"><span class="eyebrow">One suspect per team · Most-named is fired</span><h1 class="mid">The board votes</h1></div>
+    <div class="cols5" id="vote-cols"></div>
+    <div class="foot"><span id="vote-foot">Click a box to type a vote</span><span>Tie for most: all fired · Nobody named twice: nobody fired</span></div>
+  </section>
+
+  <section class="scene" id="s-review">
+    <div class="chrome"><span class="brand"><i></i>HEARTWARE</span><span class="tag">POST-INCIDENT REVIEW</span></div>
+    <div class="center">
+      <span class="eyebrow">The board has decided</span>
+      <h1 class="fired-name" id="fired-name"></h1>
+      <span class="verdict-stamp" id="fired-stamp">Terminated</span>
+      <p class="sub fade" id="fired-role"></p>
+      <p class="small-caps fade" id="hackers-line" style="margin-top:20px">Will the Hackers please step forward</p>
+    </div>
+    <div class="foot"><span>Companion · Lawyers · Witnesses · Co-founders · Auditor · Leaker · Hackers</span><span>Step forward when called</span></div>
+  </section>
+
+  <section class="scene" id="s-awards">
+    <div class="chrome"><span class="brand"><i></i>HEARTWARE</span><span class="tag">PERFORMANCE REVIEWS</span></div>
+    <div class="stack-title"><span class="eyebrow" style="color:var(--gold)">Year-end recognition</span><h1 class="mid">Exceeds expectations</h1></div>
+    <div class="awards" id="awards"></div>
+  </section>
+
+  <section class="scene" id="s-mingle">
+    <div class="chrome" style="z-index:2"><span class="brand"><i></i>HEARTWARE</span><span class="tag">FULL BACKUP RESTORED</span></div>
+    <div class="mingle-grid">
+      <div class="mingle-copy">
+        <span class="eyebrow">Executive order 001</span>
+        <h1 class="big">Mingle.<br>Mode.<br>Enabled.</h1>
+        <p class="sub" style="font-size:34px">Thank you for testing HALO.</p>
+      </div>
+      <div class="photo-frame" id="photo-frame"><span class="cam">ARCHIVE · PAST LAUNCH</span></div>
+    </div>
+    <div class="foot"><span>Bar closes 7:45 · We wrap at 8:00</span><span>Feedback: on the event page</span></div>
+  </section>
+
+  <section class="scene" id="s-party">
+    <div class="chrome"><span class="brand"><i></i>HEARTWARE</span><span class="tag">ADD-ON · AFTER HOURS</span></div>
+    <div class="center">
+      <span class="eyebrow" style="color:#ffd1f0">Executive order 002</span>
+      <h1 class="huge" style="font-size:190px;font-stretch:80%">Party.<br>Mode.<br>Enabled.</h1>
+    </div>
+    <div class="foot" style="color:#f0c6ff"><span>Optional</span><span>Dancing is not mandatory</span></div>
+  </section>
+
+  <section class="scene" id="s-standby">
+    <div class="chrome"><span class="brand"><i></i>HEARTWARE</span><span class="tag">PLEASE STAND BY</span></div>
+    <div class="center">
+      <span class="eyebrow">HALO is thinking</span>
+      <h1 class="mid" style="text-transform:none;font-stretch:100%">Please stand by.</h1>
+      <p class="sub">Your experience is important to us.</p>
+    </div>
+  </section>
+
+  <div id="glitch"></div>
+</div></div>
+
+<button id="arm" type="button" hidden><span>HALO wall</span><b>Move this window to the projector screen, then click anywhere.</b><span>It goes full screen and turns on sound. Run the show from the control panel.</span></button>
+<div id="start">
+  <div class="card">
+    <span style="font:500 12px var(--mono);letter-spacing:.2em;color:var(--ice)">HEARTWARE · SHOW CONTROL</span>
+    <h1>HALO launch show</h1>
+    <p>The slides that go on the wall, with their sound effects. Play the demo to watch the whole night in about two minutes, or click through scenes yourself.</p>
+    <p style="font-size:14px">Sound plays through this page. Turn your volume up.</p>
+    <div class="row"><button class="btn" id="go-demo" type="button">Play the demo</button><button class="btn ghost" id="go-manual" type="button">Click through myself</button></div>
+    <p style="font-size:14px">Running it live? Open the <a href="control.html" style="color:var(--ice)">control panel</a> on your laptop. It drives the wall while the host talks.</p>
+  </div>
+</div>
+
+<div id="bar">
+  <div id="prog"><span></span></div>
+  <div id="chips"></div>
+  <div class="row">
+    <button class="ctl" id="prev" type="button">◀ Prev</button>
+    <button class="ctl" id="next" type="button">Next ▶</button>
+    <button class="ctl" id="auto" type="button" aria-pressed="false">Play demo</button>
+    <button class="ctl" id="snd" type="button" aria-pressed="true">Sound on</button>
+    <button class="ctl" id="fast" type="button" aria-pressed="false">Fast timers</button>
+    <label class="ctl" for="rating">Rating
+      <select id="rating" style="font:inherit;background:transparent;color:inherit;border:0">
+        <option>G</option><option>PG</option><option>PG-13</option>
+      </select></label>
+    <button class="ctl" id="fs" type="button">Fullscreen</button>
+    <span class="hint">← → scenes · number keys jump · F fullscreen</span>
+  </div>
+</div>
+
+<script>
+const SHOW = /*SHOW*/{"client":"Acme","rating":"PG-13","teams":{"1":["Marcus Chen","Sam Okafor","Mei Lin","Omar Haddad","Yuki Tanaka","Nina Petrova"],"2":["Lena Park","Tomás García","Kofi Mensah","Zoe Martin","Isabel Cruz"],"3":["Dev Patel","Noah Williams","Ravi Iyer","Leo Novak"],"4":["Grace Kim","Aisha Rahman","Carlos Diaz","Chloe Dubois","Fatima Ali"],"5":["Priya Shah","Ben Cohen","Hannah Muller","Jamal Brooks","Ethan Reed"]},"votes":[{"team":2,"suspect":"Marcus Chen","why":"Changed their story about where they were at 6:10."},{"team":4,"suspect":"Dev Patel","why":"Too calm when the lights went red."},{"team":1,"suspect":"Marcus Chen","why":"Their lawyer wouldn't stop talking."},{"team":5,"suspect":"Marcus Chen","why":"Two Witnesses cleared everyone else at our table."},{"team":3,"suspect":"Dev Patel","why":""}],"fired":"Marcus Chen","firedRole":"Hacker","awards":[{"what":"Best Detective","who":"Grace Kim","for":"Read the logs and trusted the right person."},{"what":"Best Liar","who":"Dev Patel","for":"Covered for the Hackers all night. Nobody suspected a thing."},{"what":"Best Alibi","who":"Lena Park","for":"A Hacker who walked away clean."}],"photos":["photos/party-1.jpg","photos/party-2.jpg","photos/party-3.jpg","photos/party-4.jpg","photos/party-5.jpg","photos/party-6.jpg","photos/party-7.jpg"]}/*END*/;
+const $ = (id) => document.getElementById(id);
+const el = (t, cls, txt) => { const n = document.createElement(t); if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
+
+/* ---------- stage scaling ---------- */
+const stage = $("stage");
+function fit() { const s = Math.min(innerWidth / 1920, innerHeight / 1080); stage.style.transform = "translate(-50%, -50%) scale(" + s + ")"; }
+addEventListener("resize", fit); fit();
+
+/* ---------- scenes ---------- */
+const SCENES = [
+  { id: "lobby", key: "1", name: "Lobby", bg: "calm", dur: 6 },
+  { id: "keynote", key: "2", name: "Keynote", bg: "calm", dur: 6 },
+  { id: "incident", key: "3", name: "Critical incident", bg: "red", dur: 11 },
+  { id: "teams", key: "4", name: "Teams", bg: "code", dur: 6 },
+  { id: "investigation", key: "5", name: "Investigation", bg: "code", dur: 8 },
+  { id: "ten", key: "6", name: "10 min left", bg: "code", dur: 5 },
+  { id: "huddle", key: "7", name: "Huddle", bg: "code", dur: 6 },
+  { id: "vote", key: "8", name: "Board vote", bg: "code", dur: 9 },
+  { id: "review", key: "9", name: "Incident review", bg: "red-dim", dur: 11 },
+  { id: "awards", key: "0", name: "Awards", bg: "gold", dur: 10 },
+  { id: "mingle", key: "-", name: "Mingle", bg: "mingle", dur: 10 },
+  { id: "party", key: "=", name: "Party (add-on)", bg: "party", dur: 7, addon: true },
+  { id: "standby", key: "S", name: "Stand by", bg: "calm", dur: 5 },
+];
+let cur = -1, sceneTimers = [], fast = false, soundOn = true, rating = SHOW.rating || "PG-13";
+// Modes: no hash = self-running demo; #wall = the projector, driven by control.html; #preview = the muted copy inside control.html;
+// #<scene> = one OBS Browser source per scene.
+const MODE = location.hash === "#wall" ? "wall" : location.hash === "#preview" ? "preview" : "demo";
+const LIVE = MODE === "wall" || MODE === "preview";
+if (MODE === "preview") soundOn = false;
+
+document.querySelectorAll(".client-line").forEach((n) => { n.textContent = "Prepared for " + SHOW.client; });
+
+/* teams + vote boxes */
+const teamNums = [1, 2, 3, 4, 5];
+function renderTeams(teams) {
+  $("team-cols").replaceChildren(...teamNums.map((n) => { const b = el("div", "box"); b.append(el("div", "tn", "TEAM " + n)); (teams[n] || []).forEach((nm) => b.append(el("div", "nm", nm))); return b; }));
+}
+renderTeams(SHOW.teams);
+for (const n of teamNums) {
+  const v = el("div", "box"); v.dataset.team = n; v.append(el("div", "tn", "TEAM " + n));
+  const vote = el("div", "vote"); vote.contentEditable = String(!LIVE); vote.spellcheck = false; vote.setAttribute("aria-label", "Team " + n + " vote");
+  vote.addEventListener("blur", () => { if (vote.textContent.trim()) { v.classList.remove("in"); void v.offsetWidth; v.classList.add("in"); sfx.ping(); } });
+  v.append(vote, el("div", "why"));
+  $("vote-cols").append(v);
+}
+/* awards */
+function renderAwards(list) {
+  const shown = [...$("awards").children].map((c) => c.classList.contains("show"));
+  $("awards").replaceChildren(...list.map((a, i) => { const c = el("div", "award" + (shown[i] ? " show" : "")); c.append(el("span", "what", a.what), el("span", "who", a.who || "…"), el("span", "for", a.for || "")); return c; }));
+}
+renderAwards(SHOW.awards);
+/* photos */
+const frame = $("photo-frame");
+SHOW.photos.forEach((src, i) => { const im = el("img"); im.src = src; im.alt = ""; im.loading = "lazy"; frame.append(im); });
+
+/* ---------- timers (only count while their scene is on the wall) ---------- */
+const timers = { main: { left: 1200, total: 1200 }, huddle: { left: 120, total: 120 } };
+let lastTick = performance.now(), timersPaused = false, remoteTickAt = 0;
+function fmt(s) { s = Math.max(0, Math.ceil(s)); return String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0"); }
+function tick() {
+  const now = performance.now(), dt = (now - lastTick) / 1000; lastTick = now;
+  const sc = SCENES[cur];
+  const which = sc && (sc.id === "investigation" || sc.id === "ten") ? "main" : sc && sc.id === "huddle" ? "huddle" : null;
+  const followWall = MODE === "preview" && now - remoteTickAt < 2500;
+  if (which && !timersPaused && !followWall) timers[which].left = Math.max(0, timers[which].left - dt * (fast ? 40 : 1));
+  document.querySelectorAll("[data-timer]").forEach((t) => { const T = timers[t.dataset.timer]; t.textContent = fmt(T.left); t.classList.toggle("low", T.left <= 60); });
+}
+setInterval(tick, 100);
+
+/* ---------- sound: kit recordings for the big cues, synthesized effects for the rest ---------- */
+const files = {
+  death: new Audio("show-media/death-suspense.mp3"), boot: new Audio("show-media/boot-up.mp3"),
+  bed: new Audio("show-media/investigation-bed-loop.mp3"), chime: new Audio("show-media/chime.mp3"),
+  heart: new Audio("show-media/heartbeat-loop.mp3"),
+};
+files.bed.loop = true; files.heart.loop = true; files.bed.volume = .55; files.heart.volume = .8;
+Object.values(files).forEach((a) => { a.preload = "auto"; });
+let ac = null, master = null;
+function audio() {
+  if (!ac) { const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null; ac = new AC(); master = ac.createGain(); master.gain.value = .6; master.connect(ac.destination); }
+  if (ac.state === "suspended") ac.resume();
+  return ac;
+}
+function play(name, from) { if (!soundOn) return; const a = files[name]; try { a.currentTime = from || 0; const p = a.play(); if (p) p.catch(() => {}); } catch (e) {} }
+function stopFiles() { Object.values(files).forEach((a) => { try { a.pause(); } catch (e) {} }); }
+const loops = [];
+function stopLoops() { while (loops.length) { const l = loops.pop(); try { l(); } catch (e) {} } }
+function tone(freq, t0, dur, type, vol, dest) {
+  const o = ac.createOscillator(), g = ac.createGain(); o.type = type || "sine"; o.frequency.setValueAtTime(freq, t0);
+  g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(vol, t0 + .01); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+  o.connect(g); g.connect(dest || master); o.start(t0); o.stop(t0 + dur + .05); return o;
+}
+function noise(t0, dur, vol, hp) {
+  const len = Math.floor(ac.sampleRate * dur), buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (Math.random() < .35 ? 1 : .2);
+  const s = ac.createBufferSource(), g = ac.createGain(), f = ac.createBiquadFilter(); f.type = "highpass"; f.frequency.value = hp || 800;
+  s.buffer = buf; g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(.0001, t0 + dur);
+  s.connect(f); f.connect(g); g.connect(master); s.start(t0);
+}
+const sfx = {
+  glitch() { if (!soundOn || !audio()) return; const t = ac.currentTime; noise(t, .09, .25, 1500); noise(t + .13, .06, .18, 3000); tone(90, t, .18, "square", .08); },
+  ping() { if (!soundOn || !audio()) return; const t = ac.currentTime; tone(1320, t, .25, "sine", .25); tone(1980, t + .07, .3, "sine", .15); },
+  hit() { if (!soundOn || !audio()) return; const t = ac.currentTime; const o = ac.createOscillator(), g = ac.createGain(); o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(32, t + 1.2);
+    g.gain.setValueAtTime(.9, t); g.gain.exponentialRampToValueAtTime(.0001, t + 1.6); o.connect(g); g.connect(master); o.start(t); o.stop(t + 1.7); noise(t, .5, .35, 200); },
+  bell() { if (!soundOn || !audio()) return; const t = ac.currentTime; [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone(f, t + i * .09, 1.6, "triangle", .14)); },
+  crash() { if (!soundOn || !audio()) return; const t = ac.currentTime; for (let i = 0; i < 6; i++) noise(t + i * .11, .08, .3, 600 + i * 400);
+    const o = ac.createOscillator(), g = ac.createGain(); o.type = "sawtooth"; o.frequency.setValueAtTime(880, t); o.frequency.exponentialRampToValueAtTime(40, t + 1.4);
+    g.gain.setValueAtTime(.18, t); g.gain.exponentialRampToValueAtTime(.0001, t + 1.5); o.connect(g); g.connect(master); o.start(t); o.stop(t + 1.6); },
+  pad() { // gentle lounge chords for the mingle
+    if (!soundOn || !audio()) return; let on = true; const out = ac.createGain(); out.gain.value = .0; out.connect(master); out.gain.linearRampToValueAtTime(.5, ac.currentTime + 2);
+    const lp = ac.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1400; lp.connect(out);
+    const chords = [[220, 261.63, 329.63, 392], [174.61, 220, 261.63, 329.63], [196, 246.94, 293.66, 369.99], [164.81, 207.65, 246.94, 329.63]];
+    let k = 0; const step = () => { if (!on) return; const t = ac.currentTime; chords[k % 4].forEach((f) => { tone(f, t, 3.6, "triangle", .07, lp); tone(f * 2.003, t, 3.2, "sine", .025, lp); }); tone(chords[k % 4][0] / 2, t, 3.4, "sine", .12, lp); k++; tm = setTimeout(step, 3000); };
+    let tm = null; step(); loops.push(() => { on = false; clearTimeout(tm); out.gain.linearRampToValueAtTime(0, ac.currentTime + .6); });
+  },
+  beat() { // simple four-on-the-floor for the party add-on
+    if (!soundOn || !audio()) return; let on = true, n = 0, tm = null; const bpm = 122, sp = 60 / bpm / 2;
+    const step = () => { if (!on) return; const t = ac.currentTime + .05;
+      if (n % 2 === 0) { const o = ac.createOscillator(), g = ac.createGain(); o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(45, t + .18); g.gain.setValueAtTime(.9, t); g.gain.exponentialRampToValueAtTime(.0001, t + .3); o.connect(g); g.connect(master); o.start(t); o.stop(t + .32); }
+      else noise(t, .05, .12, 7000);
+      if (n % 8 === 4) noise(t, .16, .2, 1800);
+      if (n % 4 === 0) tone([110, 110, 98, 130.81][Math.floor(n / 8) % 4], t, .35, "sawtooth", .07);
+      n++; tm = setTimeout(step, sp * 1000); };
+    step(); loops.push(() => { on = false; clearTimeout(tm); });
+  },
+};
+function speak(text) {
+  if (!soundOn || !("speechSynthesis" in window)) return;
+  try { const u = new SpeechSynthesisUtterance(text); u.rate = .9; u.pitch = .8; const v = speechSynthesis.getVoices().find((v) => /Samantha|Google US English|Zira|Female/i.test(v.name)); if (v) u.voice = v; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {}
+}
+
+/* ---------- scene enter actions ---------- */
+function later(ms, fn) { sceneTimers.push(setTimeout(fn, ms)); }
+const ENTER = {
+  incident() {
+    const g = rating === "G";
+    $("incident-title").innerHTML = g ? "System<br>crash" : "Critical<br>incident";
+    $("incident-sub").innerHTML = g ? "CEO connection: lost<br>Status: offline" : "CEO vital signs: not detected<br>Status: deprecated";
+    if (g) { sfx.crash(); } else play("death");
+    stage.classList.remove("shake"); void stage.offsetWidth; stage.classList.add("shake");
+    later(g ? 1600 : 2600, () => speak(g ? "Critical incident. CEO connection lost. Status: offline." : "Critical incident. CEO vital signs: not detected. Status: deprecated."));
+  },
+  teams() { play("boot"); },
+  investigation() { if (!LIVE && timers.main.left <= 0) timers.main.left = timers.main.total; play("bed"); },
+  ten() { if (!LIVE && timers.main.left > 600) timers.main.left = 600; play("chime"); later(2500, () => play("bed")); },
+  huddle() { if (!LIVE) timers.huddle.left = timers.huddle.total; play("heart"); },
+  vote() {
+    play("heart");
+    if (LIVE) { live.paintVotes(false); return; }
+    const boxes = [...$("vote-cols").children];
+    boxes.forEach((b) => { b.classList.remove("in"); b.querySelector(".vote").textContent = ""; b.querySelector(".why").textContent = ""; });
+    if (!document.body.classList.contains("obs")) SHOW.votes.forEach((v, i) => later(900 + i * 1200, () => {
+      const b = boxes.find((x) => Number(x.dataset.team) === v.team); if (!b) return;
+      b.querySelector(".vote").textContent = v.suspect; b.querySelector(".why").textContent = v.why ? "“" + v.why + "”" : "";
+      b.classList.add("in"); sfx.ping();
+    }));
+  },
+  review() {
+    if (LIVE) { live.review = -1; live.paintReview(false); return; }
+    ["fired-name", "fired-stamp", "fired-role", "hackers-line"].forEach((id) => $(id).classList.remove("show"));
+    $("fired-name").textContent = SHOW.fired; $("fired-role").textContent = SHOW.fired + " was a " + SHOW.firedRole + ". The company wins.";
+    later(1800, () => { $("fired-name").classList.add("show"); sfx.hit(); });
+    later(3300, () => { $("fired-stamp").classList.add("show"); sfx.glitch(); });
+    later(5200, () => { $("fired-role").classList.add("show"); sfx.ping(); });
+    later(8000, () => { $("hackers-line").classList.add("show"); play("heart"); });
+  },
+  awards() { if (LIVE) { live.paintAwards(false); return; } [...$("awards").children].forEach((c, i) => { c.classList.remove("show"); later(1200 + i * 2600, () => { c.classList.add("show"); sfx.bell(); }); }); },
+  mingle() {
+    sfx.pad();
+    const imgs = [...frame.querySelectorAll("img")]; if (!imgs.length) return; let k = 0;
+    const show = () => { imgs.forEach((im, i) => im.classList.toggle("on", i === k % imgs.length)); k++; later(4500, show); };
+    show();
+  },
+  party() { sfx.beat(); },
+};
+
+/* ---------- background renderer ---------- */
+const cx = $("bg").getContext("2d"), W = 1920, H = 1080;
+const P = Array.from({ length: 100 }, () => ({ x: Math.random() * W, y: Math.random() * H, vx: (Math.random() - .5), vy: (Math.random() - .5) }));
+const fsz = 22, cols = Math.floor(W / fsz), drops = Array.from({ length: cols }, () => Math.random() * -60), CH = "0123456789ABCDEF<>/{}[]#";
+let bgMode = "calm", lastCode = 0; const t0 = performance.now();
+function drawBg(now) {
+  const t = (now - t0) / 1000;
+  if (bgMode === "calm" || bgMode === "gold") {
+    const gx = W / 2 + Math.sin(t * .13) * W * .3, gy = H / 2 + Math.cos(t * .1) * H * .25;
+    const g = cx.createRadialGradient(gx, gy, 40, gx, gy, W * .75); g.addColorStop(0, bgMode === "gold" ? "#2a2108" : "#0d2230"); g.addColorStop(1, "#020407"); cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+    for (const p of P) { p.x += p.vx; p.y += p.vy; if (p.x < 0 || p.x > W) p.vx *= -1; if (p.y < 0 || p.y > H) p.vy *= -1; }
+    const rgb = bgMode === "gold" ? "255,197,61" : "92,225,230";
+    for (let i = 0; i < P.length; i++) for (let j = i + 1; j < P.length; j++) { const a = P[i], b = P[j], d = Math.hypot(a.x - b.x, a.y - b.y); if (d < 190) { cx.strokeStyle = `rgba(${rgb},${(1 - d / 190) * .28})`; cx.beginPath(); cx.moveTo(a.x, a.y); cx.lineTo(b.x, b.y); cx.stroke(); } }
+    cx.fillStyle = "rgba(220,245,255,.65)"; for (const p of P) { cx.beginPath(); cx.arc(p.x, p.y, 2, 0, 7); cx.fill(); }
+  } else if (bgMode === "red" || bgMode === "red-dim") {
+    const k = bgMode === "red" ? 1 : .55, pulse = .55 + .45 * Math.abs(Math.sin(t * Math.PI / 1.5));
+    cx.fillStyle = `rgb(${Math.floor(70 * pulse * k)},0,${Math.floor(6 * pulse)})`; cx.fillRect(0, 0, W, H);
+    const g = cx.createRadialGradient(W / 2, H / 2, 100, W / 2, H / 2, W * .75); g.addColorStop(0, `rgba(200,10,20,${.35 * pulse * k})`); g.addColorStop(1, "rgba(0,0,0,.6)"); cx.fillStyle = g; cx.fillRect(0, 0, W, H);
+    cx.fillStyle = "rgba(0,0,0,.28)"; for (let y = (t * 60) % 4; y < H; y += 4) cx.fillRect(0, y, W, 1.5);
+    if (Math.random() < .15 * k) for (let i = 0; i < 4; i++) { const y = Math.random() * H; cx.fillStyle = `rgba(${Math.random() < .5 ? "255,40,60" : "80,220,255"},${.08 + Math.random() * .18})`; cx.fillRect(0, y, W, 4 + Math.random() * 36); }
+  } else if (bgMode === "code") {
+    if (now - lastCode > 60) { lastCode = now; cx.fillStyle = "rgba(2,5,6,.14)"; cx.fillRect(0, 0, W, H); cx.font = fsz + "px Menlo, Consolas, monospace";
+      for (let i = 0; i < cols; i++) { if (Math.random() < .55) continue; const y = drops[i] * fsz; cx.fillStyle = Math.random() < .03 ? "rgba(220,255,255,.8)" : "rgba(60,170,180,.32)"; cx.fillText(CH[Math.floor(Math.random() * CH.length)], i * fsz, y); drops[i]++; if (y > H && Math.random() > .975) drops[i] = Math.random() * -20; } }
+  } else if (bgMode === "mingle" || bgMode === "party") {
+    const party = bgMode === "party";
+    cx.fillStyle = party ? "#07000f" : "#03080d"; cx.fillRect(0, 0, W, H); cx.globalCompositeOperation = "lighter";
+    const blobs = party ? [[1, "255,0,170"], [.7, "140,40,255"], [1.1, "0,140,255"], [.5, "255,60,120"]] : [[.5, "40,120,160"], [.35, "92,225,230"], [.6, "120,90,200"]];
+    blobs.forEach((b, i) => { const sp = party ? .35 : .12, px = W / 2 + Math.sin(t * sp * b[0] + i * 1.7) * W * .38, py = H / 2 + Math.cos(t * sp * .8 * b[0] + i) * H * .35, r = 520 + 120 * Math.sin(t * .8 + i);
+      const g = cx.createRadialGradient(px, py, 0, px, py, r); g.addColorStop(0, `rgba(${b[1]},${party ? .55 : .22})`); g.addColorStop(1, `rgba(${b[1]},0)`); cx.fillStyle = g; cx.fillRect(0, 0, W, H); });
+    cx.globalCompositeOperation = "source-over";
+  }
+  requestAnimationFrame(drawBg);
+}
+requestAnimationFrame(drawBg);
+
+/* ---------- navigation ---------- */
+function go(i, quiet) {
+  i = (i + SCENES.length) % SCENES.length;
+  sceneTimers.forEach(clearTimeout); sceneTimers = [];
+  stopFiles(); stopLoops(); try { speechSynthesis.cancel(); } catch (e) {}
+  const sc = SCENES[i];
+  document.querySelectorAll(".scene").forEach((s) => s.classList.toggle("on", s.id === "s-" + sc.id));
+  bgMode = sc.bg; if (sc.bg === "code") { cx.fillStyle = "#020506"; cx.fillRect(0, 0, W, H); }
+  if (cur !== -1 && !quiet) { const gl = $("glitch"); gl.classList.remove("go"); void gl.offsetWidth; gl.classList.add("go"); sfx.glitch(); }
+  cur = i;
+  [...$("chips").children].forEach((c, k) => c.classList.toggle("on", k === i));
+  if (ENTER[sc.id]) ENTER[sc.id]();
+  if (auto.on) auto.arm();
+}
+SCENES.forEach((s, i) => { const b = el("button"); b.type = "button"; if (s.addon) b.className = "addon"; b.append(el("b", null, s.key), s.name); b.onclick = () => { auto.stop(); go(i); }; $("chips").append(b); });
+const auto = {
+  on: false, tm: null, startAt: 0, dur: 0,
+  arm() { clearTimeout(this.tm); const sc = SCENES[cur]; this.dur = sc.dur * 1000; this.startAt = performance.now();
+    if (sc.id === "standby" || (sc.id === "party")) { this.tm = setTimeout(() => this.stop(), this.dur); return; }
+    this.tm = setTimeout(() => go(cur + 1), this.dur); },
+  start() { this.on = true; fast = true; $("fast").setAttribute("aria-pressed", "true"); timers.main.left = 1200; timers.huddle.left = 120; $("auto").setAttribute("aria-pressed", "true"); $("auto").textContent = "Stop demo"; go(0); },
+  stop() { this.on = false; clearTimeout(this.tm); $("auto").setAttribute("aria-pressed", "false"); $("auto").textContent = "Play demo"; $("prog").firstElementChild.style.width = "0"; },
+};
+(function progress() { if (auto.on && auto.dur) { const p = Math.min(1, (performance.now() - auto.startAt) / auto.dur); $("prog").firstElementChild.style.width = ((cur + p) / SCENES.length * 100) + "%"; } requestAnimationFrame(progress); })();
+
+$("prev").onclick = () => { auto.stop(); go(cur - 1); };
+$("next").onclick = () => { auto.stop(); go(cur + 1); };
+$("auto").onclick = () => { audio(); auto.on ? auto.stop() : auto.start(); };
+$("snd").onclick = () => { soundOn = !soundOn; $("snd").setAttribute("aria-pressed", String(soundOn)); $("snd").textContent = soundOn ? "Sound on" : "Sound off"; if (!soundOn) { stopFiles(); stopLoops(); } };
+$("fast").onclick = () => { fast = !fast; $("fast").setAttribute("aria-pressed", String(fast)); };
+$("rating").value = rating; $("rating").onchange = (e) => { rating = e.target.value; };
+$("fs").onclick = () => { const d = document.documentElement; (document.fullscreenElement ? document.exitFullscreen() : d.requestFullscreen && d.requestFullscreen()).catch?.(() => {}); };
+$("go-demo").onclick = () => { $("start").hidden = true; audio(); auto.start(); };
+$("go-manual").onclick = () => { $("start").hidden = true; audio(); go(cur < 0 ? 0 : cur, true); };
+
+addEventListener("keydown", (e) => {
+  if (e.target.isContentEditable || e.target.tagName === "SELECT") return;
+  if (LIVE) { if (e.key === "f" || e.key === "F") $("fs").click(); return; }
+  if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") { e.preventDefault(); auto.stop(); go(cur + 1); }
+  else if (e.key === "ArrowLeft" || e.key === "PageUp") { e.preventDefault(); auto.stop(); go(cur - 1); }
+  else if (e.key === "f" || e.key === "F") $("fs").click();
+  else { const i = SCENES.findIndex((s) => s.key.toLowerCase() === e.key.toLowerCase()); if (i >= 0) { auto.stop(); $("start").hidden = true; audio(); go(i); } }
+});
+
+/* hide the control bar when the mouse rests */
+let idle = null;
+function wake() { $("bar").classList.remove("hide"); document.body.style.cursor = ""; clearTimeout(idle); idle = setTimeout(() => { if (!$("bar").matches(":hover")) { $("bar").classList.add("hide"); document.body.style.cursor = "none"; } }, 3000); }
+addEventListener("mousemove", wake); addEventListener("touchstart", wake, { passive: true }); wake();
+
+/* ---------- live mode: control.html drives the wall over a BroadcastChannel (plus localStorage as a backup) ---------- */
+const STORE = "halo-show-state";
+const article = (r) => (r ? (/^[AEIOU]/i.test(r) ? "an " : "a ") + r : "…");
+const live = {
+  st: null, review: -1, ch: null,
+  send(msg) { try { if (live.ch) live.ch.postMessage(msg); } catch (e) {} },
+  fired() {
+    const counts = new Map();
+    for (const n of teamNums) { const v = live.st && live.st.votes && live.st.votes[n]; if (!v || !v.suspect) continue;
+      const k = v.suspect.trim().toLowerCase(), c = counts.get(k) || { name: v.suspect.trim(), n: 0 }; c.n++; counts.set(k, c); }
+    const list = [...counts.values()].sort((a, b) => b.n - a.n), max = list.length ? list[0].n : 0;
+    return max >= 2 ? list.filter((c) => c.n === max).map((c) => c.name) : [];
+  },
+  paintVotes(animate) {
+    [...$("vote-cols").children].forEach((b) => {
+      const v = live.st && live.st.votes && live.st.votes[b.dataset.team], name = (v && v.suspect) || "", vote = b.querySelector(".vote");
+      if (vote.textContent !== name) {
+        vote.textContent = name; b.querySelector(".why").textContent = v && v.why ? "“" + v.why + "”" : "";
+        if (name && animate && SCENES[cur].id === "vote") { b.classList.remove("in"); void b.offsetWidth; b.classList.add("in"); sfx.ping(); }
+      }
+      if (!name) b.classList.remove("in"); else if (!animate) b.classList.add("in");
+    });
+  },
+  paintReview(animate) {
+    const st = live.st || {}, step = st.reviewStep || 0, fired = live.fired(), roles = st.roles || {};
+    $("fired-name").textContent = fired.length ? fired.join(" & ") : "Nobody";
+    $("fired-stamp").textContent = fired.length ? "Terminated" : "No majority";
+    let line = "No one was named by two or more teams. The Hackers get away with it.";
+    if (fired.length) {
+      const anyHacker = fired.some((f) => (roles[f] || "").toLowerCase() === "hacker"), allKnown = fired.every((f) => roles[f]);
+      line = fired.map((f) => f + " was " + article(roles[f])).join(". ") + ". " + (anyHacker ? "The company wins." : allKnown ? "The Hackers get away with it." : "");
+    }
+    $("fired-role").textContent = line.trim();
+    if (animate && SCENES[cur].id === "review" && step > live.review) {
+      if (step >= 1 && live.review < 1) { sfx.hit(); later(900, () => sfx.glitch()); }
+      if (step >= 2 && live.review < 2) sfx.ping();
+      if (step >= 3 && live.review < 3) play("heart");
+    }
+    const on = (id, yes) => $(id).classList.toggle("show", yes);
+    on("fired-name", step >= 1); on("fired-stamp", step >= 1); on("fired-role", step >= 2); on("hackers-line", step >= 3);
+    live.review = step;
+  },
+  paintAwards(animate) {
+    const n = (live.st && live.st.awardsShown) || 0;
+    [...$("awards").children].forEach((c, i) => { const was = c.classList.contains("show"); c.classList.toggle("show", i < n); if (!was && i < n && animate && SCENES[cur].id === "awards") sfx.bell(); });
+  },
+  apply(st, animate) {
+    const prev = live.st; live.st = st;
+    if (st.rating) rating = st.rating;
+    if (!prev || JSON.stringify(prev.teams) !== JSON.stringify(st.teams)) renderTeams(st.teams || {});
+    if (!prev || JSON.stringify(prev.awards) !== JSON.stringify(st.awards)) renderAwards(st.awards || []);
+    fast = !!st.fast; timersPaused = !!st.paused;
+    const i = SCENES.findIndex((s) => s.id === st.scene);
+    if (i >= 0 && i !== cur) go(i, !animate); // each scene's enter action paints votes, review and awards
+    else { live.paintVotes(animate); live.paintReview(animate); live.paintAwards(animate); }
+  },
+  timer(m) { const T = timers[m.which]; if (!T) return; if (m.action === "reset") T.left = T.total; else if (m.action === "add") T.left = Math.max(0, T.left + m.value); },
+};
+
+const hashScene = SCENES.findIndex((s) => "#" + s.id === location.hash);
+if (LIVE) {
+  document.body.classList.add("obs");
+  const onMsg = (m) => {
+    if (!m) return;
+    if (m.type === "state") live.apply(m.state, true);
+    else if (m.type === "timer" && (MODE === "wall" || performance.now() - remoteTickAt > 2500)) live.timer(m);
+    else if (m.type === "tick" && MODE === "preview") { timers.main.left = m.main; timers.huddle.left = m.huddle; remoteTickAt = performance.now(); }
+  };
+  try { live.ch = new BroadcastChannel("halo-show"); live.ch.onmessage = (e) => onMsg(e.data); } catch (e) {}
+  addEventListener("storage", (e) => { if (e.key === STORE && e.newValue) { try { live.apply(JSON.parse(e.newValue), true); } catch (er) {} } });
+  let saved = null; try { saved = JSON.parse(localStorage.getItem(STORE) || "null"); } catch (e) {}
+  go(0, true); if (saved) live.apply(saved, false);
+  $("vote-foot").textContent = "First vote per team counts";
+  try { const t = JSON.parse(localStorage.getItem(STORE + "-timers") || "null"); if (t && MODE === "wall") { timers.main.left = t.main; timers.huddle.left = t.huddle; } } catch (e) {}
+  if (MODE === "wall") {
+    setInterval(() => { try { localStorage.setItem(STORE + "-timers", JSON.stringify({ main: timers.main.left, huddle: timers.huddle.left })); } catch (e) {} }, 1000);
+    setInterval(() => live.send({ type: "tick", main: timers.main.left, huddle: timers.huddle.left, scene: SCENES[cur].id, armed: !!(ac && ac.state === "running") }), 500);
+    $("arm").hidden = false;
+    $("arm").onclick = () => { audio(); $("arm").hidden = true; const d = document.documentElement; if (d.requestFullscreen) d.requestFullscreen().catch(() => {}); };
+  }
+} else if (hashScene >= 0) { document.body.classList.add("obs"); $("start").hidden = true; go(hashScene, true); }
+else go(0, true);
+
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+name,phone,role,team,knows,code
+Marcus Chen,,Hacker A,1,,HAK-247
+Lena Park,,Hacker B,2,,UEM-CKW
+Dev Patel,,Leaker,3,,LEK-318
+Grace Kim,,Auditor,4,,AUD-552
+Priya Shah,,Co-founder,5,,COF-610
+Sam Okafor,,Co-founder,1,,W4K-TEH
+Tomás García,,Companion,2,,CMP-774
+Noah Williams,,Lawyer,3,,LAW-139
+Aisha Rahman,,Lawyer,4,,AFA-9GQ
+Ben Cohen,,Lawyer,5,,NEM-T46
+Mei Lin,,Lawyer,1,,EE3-UFH
+Kofi Mensah,,Employee,2,,EMP-405
+Carlos Diaz,,Witness,4,Grace Kim,WIT-862
+Hannah Muller,,Witness,5,Priya Shah,QFF-EGM
+Omar Haddad,,Witness,1,Noah Williams,4HC-V3K
+Zoe Martin,,Witness,2,Kofi Mensah,G7W-FC6
+Ravi Iyer,,Witness,3,Sam Okafor,GAD-4EM
+Chloe Dubois,,Witness,4,Dev Patel,GRV-YCH
+Jamal Brooks,,Witness,5,Aisha Rahman,3WP-M7N
+Yuki Tanaka,,Witness,1,Ben Cohen,QDN-QJP
+Isabel Cruz,,Witness,2,Mei Lin,7VV-3YU
+Leo Novak,,Witness,3,Carlos Diaz,3T7-AMA
+Fatima Ali,,Witness,4,Zoe Martin,RM7-UR9
+Ethan Reed,,Witness,5,Omar Haddad,WP3-4G9
+Nina Petrova,,Witness,1,Ravi Iyer,QJQ-R7K

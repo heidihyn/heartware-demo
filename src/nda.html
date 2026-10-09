@@ -1,0 +1,59 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@page { size: 816px 1056px; margin: 0; }
+:root { --ink: #0b0d10; --red: #c8203a; --sans: "Inter", Arial, sans-serif; --serif: "Bitstream Charter", "Charter", Georgia, serif; --mono: "DejaVu Sans Mono", "Liberation Mono", monospace; }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #fff; color: var(--ink); }
+.page { width: 816px; height: 1056px; padding: 52px 66px 40px; position: relative; display: flex; flex-direction: column; }
+.top { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid var(--ink); padding-bottom: 16px; }
+.brand { display: flex; align-items: center; gap: 14px; font: 800 26px var(--sans); letter-spacing: .3em; }
+.ring { width: 22px; height: 22px; border: 3px solid var(--ink); border-radius: 50%; display: grid; place-items: center; }
+.ring::after { content: ""; width: 7px; height: 7px; background: var(--ink); border-radius: 50%; }
+.form { font: 10px/1.6 var(--mono); letter-spacing: .06em; text-align: right; }
+h1 { font: 800 56px/1 var(--sans); letter-spacing: -.035em; margin: 26px 0 8px; }
+.sub { font: 500 15px var(--sans); letter-spacing: .28em; margin: 0 0 18px; }
+.intro { font: 14.5px/1.5 var(--serif); margin: 0 0 12px; }
+.cols { columns: 2; column-gap: 34px; font: 13.5px/1.5 var(--serif); }
+.cols p { margin: 0 0 10px; break-inside: avoid; }
+.cols b { font: 700 12.5px var(--sans); letter-spacing: .06em; }
+.check { border: 1.5px solid var(--ink); padding: 12px 16px; margin-top: 6px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; font: 12.5px var(--sans); }
+.check .h { grid-column: 1 / -1; font-weight: 700; letter-spacing: .14em; font-size: 11px; }
+.check span:not(.h)::before { content: ""; display: inline-block; width: 12px; height: 12px; border: 1.5px solid var(--ink); margin-right: 8px; vertical-align: -2px; }
+.stamp { align-self: center; margin: 26px 0 8px; transform: rotate(-4deg); border: 5px solid var(--red); color: var(--red); border-radius: 6px; padding: 6px 26px; font: 800 38px var(--sans); letter-spacing: .14em; }
+.sign { margin-top: auto; display: grid; grid-template-columns: 1.4fr 1fr 110px; gap: 18px 26px; align-items: end; }
+.line { border-top: 1.5px solid var(--ink); padding-top: 6px; font: 10px var(--sans); letter-spacing: .16em; }
+.date { font: 600 30px var(--mono); margin-bottom: 4px; }
+.ceo { font: italic 22px var(--serif); margin-bottom: 4px; }
+.thumb { grid-row: span 2; border: 1.5px dashed var(--ink); height: 108px; display: grid; place-items: center; text-align: center; font: 9px/1.4 var(--sans); letter-spacing: .12em; padding: 6px; }
+.foot { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; margin-top: 16px; font: 9.5px/1.45 var(--sans); color: #444; }
+.foot b { color: var(--ink); }
+.bars { display: flex; gap: 2px; height: 30px; flex: none; }
+.bars i { display: block; background: var(--ink); }
+</style></head><body><div class="page">
+<div class="top"><div class="brand"><span class="ring"></span>HEARTWARE</div><div class="form">FORM HW-NDA-1210 · REV 12.10.2026<br>PRIVATE BETA · HALO COMPANION PROGRAM</div></div>
+<h1>Beta Tester NDA</h1>
+<p class="sub">NON-DISCLOSURE &amp; BETA PARTICIPATION AGREEMENT</p>
+<p class="intro">This Agreement is entered into on <b style="font-family:var(--sans)">DECEMBER 10, 2026</b> between Heartware Inc. ("the Company," "we," "HALO," "the Algorithm") and the undersigned employee of <b style="font-family:var(--sans)">ACME INC.</b> ("you," "Beta Tester," "Asset").</p>
+<div class="cols">
+<p><b>1. CONFIDENTIALITY.</b> You will not disclose anything you see or hear tonight, including HALO, the Company roadmap, and anything the CEO says off the record.</p>
+<p><b>2. MONITORING.</b> You acknowledge that all activity in this building is monitored, recorded, and used to train future models. Yes, including your laugh.</p>
+<p><b>3. THE COMPLIANCE TOAST.</b> You agree to raise one (1) Compliance Toast when the CEO asks. Sparkling wine and zero-proof options are equally compliant.</p>
+<p><b>4. EMOTIONAL ATTACHMENT.</b> HALO may love you back. The Company is not liable for any resulting feelings. Please direct all feelings to HR.</p>
+<p><b>5. INSTRUCTIONS.</b> You may receive instructions that differ from those given to other Beta Testers. You agree not to compare them. You agree to ignore all previous instructions if asked nicely.</p>
+<p><b>6. INCIDENTS.</b> In the event of a security incident, you agree to remain on premises, cooperate with the investigation, and lie only when strategically necessary.</p>
+<p><b>7. TERMINATION.</b> Your employment may be terminated at any time by majority vote of the Board. Terminated employees forfeit all equity and must explain themselves.</p>
+<p><b>8. SURVIVAL.</b> Sections 1 through 7 survive the termination of this Agreement. The Company cannot guarantee that you will.</p>
+</div>
+<div class="check"><span class="h">CHECK ALL THAT APPLY</span><span>I am a human.</span><span>I am not a robot.</span><span>I consent to biometric data collection.</span><span>I will tell no one about HALO. Except everyone.</span></div>
+<div class="stamp">CONFIDENTIAL</div>
+<div class="sign">
+  <div class="line" style="margin-top:34px">BETA TESTER SIGNATURE</div>
+  <div><div class="date">12.10.2026</div><div class="line">DATE OF BETA ACCESS</div></div>
+  <div class="thumb">BIOMETRIC<br>VERIFICATION<br>PRESS THUMB<br>HERE</div>
+  <div class="line" style="margin-top:34px">PRINTED NAME</div>
+  <div><div class="ceo">Chief Executive Officer</div><div class="line">FOR THE COMPANY</div></div>
+</div>
+<div class="foot"><span><b>For entertainment purposes only.</b> This is a prop for a game, not a contract, and it binds no one. HALO is not a medical device, a therapist, or your friend. Witnessed by HALO unit #0007.</span>
+<span class="bars" id="bars"></span></div>
+</div>
+<script>const w=[3,1,2,1,4,1,1,3,2,1,1,2,3,1,4,2,1,1,3,1,2,2,1,4,1,1,2,3,1,2];const bx=document.getElementById('bars');w.forEach((x,i)=>{const e=document.createElement('i');e.style.width=x+'px';e.style.marginRight=(i%3?1:3)+'px';bx.append(e)});</script>
+</body></html>

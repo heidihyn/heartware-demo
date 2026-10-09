@@ -1,0 +1,28 @@
+{
+  "demo": true,
+  "client": "Acme Inc.",
+  "contactName": "Jordan Lee, Acme People Team",
+  "contactEmail": "events@acme.example",
+  "rating": "PG-13",
+  "danceFloor": false,
+  "fireWord": "fire",
+  "calendar": {
+    "title": "HALO private beta (Heartware x Acme)",
+    "start": "20261211T013000Z",
+    "end": "20261211T040000Z",
+    "location": "Acme HQ, 4th floor Commons",
+    "details": "Your secret role and everything else: see the event page. Bring your access code."
+  },
+  "djInviteUrl": "",
+  "playlistUrl": "",
+  "demoCodes": [
+    { "label": "HACKER", "code": "HAK-247" },
+    { "label": "LEAKER", "code": "LEK-318" },
+    { "label": "AUDITOR", "code": "AUD-552" },
+    { "label": "CO-FOUNDER", "code": "COF-610" },
+    { "label": "COMPANION", "code": "CMP-774" },
+    { "label": "LAWYER", "code": "LAW-139" },
+    { "label": "WITNESS", "code": "WIT-862" },
+    { "label": "EMPLOYEE", "code": "EMP-405" }
+  ]
+}

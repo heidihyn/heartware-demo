@@ -1,0 +1,170 @@
+// Builds index.html from site.src.html + guest-roles.csv + config.json.
+// Each guest's role and secret line is encrypted with a key derived from a private access code
+// that only they get (in Heidi's DM), so the page source holds no readable role map and
+// knowing someone's phone number doesn't unlock their role.
+// Usage: node build.mjs   (run from this folder). Rebuilding resets the live vote results.
+import { readFileSync, writeFileSync, existsSync, mkdirSync, copyFileSync, readdirSync } from "node:fs";
+import { webcrypto as crypto } from "node:crypto";
+
+const ITER = 600000;
+const src = readFileSync("site.src.html", "utf8");
+const config = JSON.parse(readFileSync("config.json", "utf8"));
+
+function parseCsv(text) {
+  const rows = [];
+  for (const line of text.split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    const cells = []; let cur = "", q = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (q) { if (c === '"' && line[i + 1] === '"') { cur += '"'; i++; } else if (c === '"') q = false; else cur += c; }
+      else if (c === '"') q = true; else if (c === ",") { cells.push(cur); cur = ""; } else cur += c;
+    }
+    cells.push(cur); rows.push(cells.map((s) => s.trim()));
+  }
+  const [head, ...body] = rows;
+  return body.map((r) => Object.fromEntries(head.map((h, i) => [h.toLowerCase(), r[i] || ""])));
+}
+
+const norm = (p) => { let d = p.replace(/\D/g, ""); if (d.length === 11 && d[0] === "1") d = d.slice(1); return d; };
+const normCode = (c) => c.toUpperCase().replace(/[^A-Z0-9]/g, "");
+const guests = parseCsv(readFileSync(existsSync("guest-roles.csv") ? "guest-roles.csv" : "guest-roles.example.csv", "utf8")).filter((g) => g.name);
+// Every guest gets a 6-character access code, saved back into guest-roles.csv so rebuilds keep it.
+const CODE_ALPHABET = "ACDEFGHJKMNPQRTUVWXY34679";
+const newCode = () => { const b = crypto.getRandomValues(new Uint8Array(6)); const c = Array.from(b, (x) => CODE_ALPHABET[x % CODE_ALPHABET.length]).join(""); return c.slice(0, 3) + "-" + c.slice(3); };
+const usedCodes = new Set(guests.map((g) => normCode(g.code || "")).filter(Boolean));
+let codesAdded = false;
+for (const g of guests) if (!g.code) { let c; do c = newCode(); while (usedCodes.has(normCode(c))); usedCodes.add(normCode(c)); g.code = c; codesAdded = true; }
+if (codesAdded && existsSync("guest-roles.csv")) {
+  const cols = ["name", "phone", "role", "team", "knows", "title", "code"].filter((c) => c !== "title" || guests.some((g) => g.title));
+  const esc = (v) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+  writeFileSync("guest-roles.csv", [cols.join(","), ...guests.map((g) => cols.map((c) => esc(g[c] || "")).join(","))].join("\n") + "\n");
+}
+const problems = [];
+const byRole = (r) => guests.filter((g) => g.role.toLowerCase() === r.toLowerCase());
+const one = (r) => byRole(r)[0]?.name;
+const hackerA = one("Hacker A"), hackerB = one("Hacker B"), intern = one("Companion") || one("HALO") || one("Intern");
+
+// Witness job titles (owned by the mystery thread). Flavor only; shown just in the private reveal.
+const titlesFile = ["../witness-job-titles.md", "witness-job-titles.md"].find((f) => existsSync(f));
+const TITLES = titlesFile ? readFileSync(titlesFile, "utf8").split("\n")
+  .map((l) => l.match(/^\|\s*\d+\s*\|\s*([^|]+?)\s*\|[^|]*\|\s*([^|]+?)\s*\|/)).filter(Boolean)
+  .map((m) => ({ title: m[1], flavor: m[2] })) : [];
+const witnesses = byRole("Witness");
+const usedTitles = new Set(witnesses.map((g) => g.title).filter(Boolean));
+const freeTitles = TITLES.filter((t) => !usedTitles.has(t.title));
+for (const g of witnesses) {
+  if (!g.title) g.title = freeTitles.shift()?.title || "";
+  g.flavor = TITLES.find((t) => t.title === g.title)?.flavor || "";
+}
+
+function secretFor(g) {
+  const r = g.role.toLowerCase();
+  if (r === "hacker a") return { role: "hacker", line: hackerB ? `Your fellow Hacker is ${hackerB}. Keep this secret. 😈` : "You're the only Hacker tonight. Keep this secret. 😈" };
+  if (r === "hacker b") return { role: "hacker", line: hackerA ? `Your fellow Hacker is ${hackerA}. Keep this secret. 😈` : "You're the only Hacker tonight. Keep this secret. 😈" };
+  if (r === "leaker") return { role: "leaker", line: `The Hackers are ${[hackerA, hackerB].filter(Boolean).join(" and ")}. ` + (byRole("Leaker").length > 1 ? "But the Hackers don't know who the Leakers are. There's one other Leaker, and you don't know each other either." : "But the Hackers don't know who the Leaker is.") };
+  if (r === "auditor") { const pair = [intern, hackerA].filter(Boolean); /* fixed order so rebuilds keep DMs and site in sync */ return { role: "auditor", line: `One of these two is a Hacker: ${pair.join(" or ")}.` }; }
+  if (r === "co-founder" || r === "cofounder") { const other = byRole("Co-founder").concat(byRole("Cofounder")).find((x) => x !== g); return { role: "cofounder", line: other ? `Your co-founder is ${other.name}. You're both innocent.` : "You're the only co-founder tonight. You're innocent." }; }
+  if (r === "companion" || r === "halo" || r === "intern") return { role: "companion", line: hackerA ? `You were programmed to protect ${hackerA}. They don't know it's you.` : "" };
+  if (r === "lawyer") return { role: "lawyer", line: `Your client is ${hackerB}. You're not the only lawyer on this case.` };
+  if (r === "witness") {
+    if (!g.knows) problems.push(`${g.name}: Witness with no "knows" name`);
+    if ([hackerA, hackerB, intern].includes(g.knows)) problems.push(`${g.name}: Witness clears ${g.knows}, who is a Hacker or the Companion`);
+    return { role: "witness", title: g.title, flavor: g.flavor, line: g.knows ? `You know for sure that ${g.knows} is NOT a Hacker.` : "" };
+  }
+  if (r === "employee") return { role: "employee", line: "" };
+  problems.push(`${g.name}: unknown role "${g.role}"`);
+  return { role: "employee", line: "" };
+}
+
+const seen = new Set();
+for (const g of guests.filter((x) => x.phone)) { const p = norm(g.phone); if (p.length < 7) problems.push(`${g.name}: phone "${g.phone}" looks incomplete`); if (seen.has(p)) problems.push(`${g.name}: duplicate phone ${g.phone}`); seen.add(p); }
+if (guests.length && !hackerB) problems.push("No Hacker B, so Lawyer lines have no client");
+
+const b64 = (u8) => Buffer.from(u8).toString("base64");
+const hex = (u8) => Buffer.from(u8).toString("hex");
+const salt = crypto.getRandomValues(new Uint8Array(16));
+const entries = {};
+const secrets = new Map(guests.map((g) => [g, secretFor(g)]));
+for (const g of guests) {
+  const s = secrets.get(g);
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(normCode(g.code)), "PBKDF2", false, ["deriveBits"]);
+  const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt, iterations: ITER }, base, 512));
+  const key = await crypto.subtle.importKey("raw", bits.slice(0, 32), "AES-GCM", false, ["encrypt"]);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(JSON.stringify({ name: g.name, ...s }))));
+  entries[hex(bits.slice(32, 48))] = b64(new Uint8Array([...iv, ...ct]));
+}
+// Shuffle entry order so it doesn't follow the CSV (role) order.
+const shuffled = Object.fromEntries(Object.entries(entries).sort(() => Math.random() - 0.5));
+const roster = { v: 1, iter: ITER, salt: guests.length ? b64(salt) : "", entries: shuffled };
+config.live = guests.length > 0;
+
+let out = src
+  .replace(/\/\*CONFIG\*\/[\s\S]*?\/\*END\*\//, "/*CONFIG*/" + JSON.stringify(config) + "/*END*/")
+  .replace(/\/\*ROSTER\*\/[\s\S]*?\/\*END\*\//, "/*ROSTER*/" + JSON.stringify(roster) + "/*END*/")
+  .replace(/\/\*GUESTS\*\/[\s\S]*?\/\*END\*\//, "/*GUESTS*/" + JSON.stringify(guests.map((g) => g.name).sort((a, b) => a.localeCompare(b))) + "/*END*/");
+// Optional softer wording for clients who'd rather not say "fired" (config.fireWord: "deactivate").
+const FIRE = { deactivate: { fired: "deactivated", Fired: "Deactivated", fire: "deactivate", Fire: "Deactivate" } }[config.fireWord];
+if (FIRE) out = out
+  .replace(/\b(gets|get|isn't|is|be|getting|yourself|Nobody|was) fired\b/g, (m, w) => w + " " + FIRE.fired)
+  .replace(/\bFire (one|a Hacker)\b/g, (m, w) => FIRE.Fire + " " + w)
+  .replace(/Terminated by the board/g, "Deactivated by the board");
+writeFileSync(process.argv[2] || "index.html", out);
+// tpl.txt lets the host panel republish the page with vote results filled in.
+writeFileSync(process.argv[3] || "tpl.txt", out);
+// Standalone copy for hosting outside claude.ai (Netlify etc.): no live vote panel,
+// Verdict points to the projector instead.
+const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+const head = `<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n<meta name="description" content="HALO private beta for ${esc(config.client || "your team")}">\n<meta property="og:title" content="HALO Private Beta · Heartware">\n<meta property="og:description" content="You've been selected to test HALO, the companion that loves you back.">\n<meta property="og:type" content="website">\n<meta property="og:image" content="og-image.png">\n<meta name="robots" content="noindex">\n<title>Heartware Beta Portal</title>\n</head>\n<body>\n`;
+const standalone = head + out.replace(/<title>[^<]*<\/title>\n?/, "") + "\n</body>\n</html>\n";
+  + out.replace(/<title>[^<]*<\/title>\n?/, "")
+  + "\n</body>\n</html>\n";
+mkdirSync("standalone", { recursive: true });
+writeFileSync("standalone/index.html", standalone);
+
+// Code sheet (who gets which code) and the invites page with each guest's code filled in.
+writeFileSync("guest-codes.md", "# Guest codes\n\nEach guest's access code goes on their invite card or in their invite email. They enter it on the event page to unlock their role.\n\n| Name | Team | Role | Code |\n|---|---|---|---|\n"
+  + guests.map((g) => `| ${g.name} | ${g.team} | ${secrets.get(g).title || g.role} | ${g.code} |`).join("\n") + "\n");
+if (existsSync("invite.src.html")) {
+  const inv = guests.map((g) => ({ name: g.name, code: g.code })).sort((a, b) => a.name.localeCompare(b.name));
+  const invPage = readFileSync("invite.src.html", "utf8").replace(/\/\*INVITES\*\/[\s\S]*?\/\*END\*\//, "/*INVITES*/" + JSON.stringify({ guests: inv, config: { client: config.client, contactName: config.contactName, contactEmail: config.contactEmail, rating: config.rating, demo: config.demo } }) + "/*END*/");
+  writeFileSync("invite.html", invPage);
+  writeFileSync("standalone/invite.html", invPage);
+}
+// The show (projector slides): teams, demo votes, reveal and awards come from the roster.
+if (existsSync("show.src.html")) {
+  const teams = {};
+  for (const g of guests) (teams[g.team] ||= []).push(g.name);
+  const leaker = one("Leaker"), auditor = one("Auditor");
+  const show = {
+    client: (config.client || "Acme Inc.").replace(/,? Inc\.?$/, ""), rating: config.rating || "PG-13",
+    teams,
+    votes: hackerA ? [
+      { team: 2, suspect: hackerA, why: "Changed their story about where they were at 6:10." },
+      { team: 4, suspect: leaker || hackerA, why: "Too calm when the lights went red." },
+      { team: 1, suspect: hackerA, why: "Their lawyer wouldn't stop talking." },
+      { team: 5, suspect: hackerA, why: "Two Witnesses cleared everyone else at our table." },
+      { team: 3, suspect: leaker || hackerA, why: "" },
+    ] : [],
+    fired: hackerA || "", firedRole: "Hacker",
+    awards: [
+      { what: "Best Detective", who: auditor || "", for: "Read the logs and trusted the right person." },
+      { what: "Best Liar", who: leaker || "", for: "Covered for the Hackers all night. Nobody suspected a thing." },
+      { what: "Best Alibi", who: hackerB || "", for: "A Hacker who walked away clean." },
+    ].filter((a) => a.who),
+    photos: existsSync("photos") ? readdirSync("photos").filter((f) => /\.(jpe?g|png|webp)$/i.test(f)).sort().map((f) => "photos/" + f) : [],
+  };
+  const page = readFileSync("show.src.html", "utf8").replace(/\/\*SHOW\*\/[\s\S]*?\/\*END\*\//, () => "/*SHOW*/" + JSON.stringify(show).replace(/</g, "\\u003c") + "/*END*/");
+  writeFileSync("show.html", page); writeFileSync("standalone/show.html", page);
+  if (existsSync("control.src.html")) {
+    const ctl = { client: show.client, rating: show.rating, teams, awards: show.awards, names: guests.map((g) => g.name).sort((a, b) => a.localeCompare(b)) };
+    const cpage = readFileSync("control.src.html", "utf8").replace(/\/\*SHOW\*\/[\s\S]*?\/\*END\*\//, () => "/*SHOW*/" + JSON.stringify(ctl).replace(/</g, "\\u003c") + "/*END*/");
+    writeFileSync("control.html", cpage); writeFileSync("standalone/control.html", cpage);
+  }
+  if (existsSync("show-media")) { mkdirSync("standalone/show-media", { recursive: true }); for (const f of readdirSync("show-media")) copyFileSync("show-media/" + f, "standalone/show-media/" + f); }
+}
+for (const f of ["nda.pdf", "nda-share.png", "og-image.png"]) copyFileSync(f, "standalone/" + f);
+if (existsSync("photos")) { mkdirSync("standalone/photos", { recursive: true }); for (const f of readdirSync("photos")) copyFileSync("photos/" + f, "standalone/photos/" + f); }
+console.log(`Built with ${guests.length} guests.`);
+if (problems.length) console.log("Check these:\n- " + problems.join("\n- "));
