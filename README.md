@@ -2,7 +2,7 @@
 
 A copy of the birthday guest site, reworked for a corporate client. Everything here is fictional: Acme Inc., the 25 guests in `guest-roles.csv` and their access codes. The live birthday site and its repo are untouched.
 
-Live: https://heidihyn.github.io/heartware-demo/ (show control: /control.html, wall: /show.html#wall). GitHub Pages republishes `standalone/` on every push to `main`.
+Live: https://heidihyn.github.io/heartware-demo/ (show control: /control.html, wall: /show.html#wall). GitHub Pages serves the repo root from `main`; `node build.mjs` copies the pages there.
 
 ## What's here
 - `site.src.html`: the guest page (schedule, content rating, roles, access-code lookup, venue, drinks, food, NDA, team vote, music, photos, feedback).
@@ -17,4 +17,4 @@ Live: https://heidihyn.github.io/heartware-demo/ (show control: /control.html, w
 ## Update
 1. Edit the `.src.html` files, `config.json` or `guest-roles.csv`.
 2. `node build.mjs` writes `index.html`, `invite.html`, `show.html` and a hostable copy in `standalone/`.
-3. Commit and push. The Pages workflow publishes `standalone/`.
+3. Commit and push. Pages redeploys in about a minute.

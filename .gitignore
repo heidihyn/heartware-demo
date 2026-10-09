@@ -1,6 +1,2 @@
-# Build outputs for the Claude preview (the site is served from standalone/)
-/index.html
+# Generated for the Claude preview
 /tpl.txt
-/invite.html
-/show.html
-/control.html

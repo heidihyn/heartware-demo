@@ -168,3 +168,5 @@ for (const f of ["nda.pdf", "nda-share.png", "og-image.png"]) copyFileSync(f, "s
 if (existsSync("photos")) { mkdirSync("standalone/photos", { recursive: true }); for (const f of readdirSync("photos")) copyFileSync("photos/" + f, "standalone/photos/" + f); }
 console.log(`Built with ${guests.length} guests.`);
 if (problems.length) console.log("Check these:\n- " + problems.join("\n- "));
+// GitHub Pages serves this repo's root (deploy from branch), so in the repo the hostable pages also go to the root.
+if (existsSync(".nojekyll")) for (const f of ["index.html", "show.html", "control.html", "invite.html"]) if (existsSync("standalone/" + f)) copyFileSync("standalone/" + f, f);
